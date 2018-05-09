@@ -1,10 +1,35 @@
+/*
+ * ONNXAlgebraGenerator
+ * Copyright (c) 2018 Alexander Merritt
+ * All rights reserved. 
+ * This program is free software: you can redistribute it and/or modify
+ *
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+package org.emergentorder.onnx
+
 import scala.meta._
 import java.nio.file.Files
 import java.nio.file.Paths
 
 object ONNXAlgebraGenerator extends App {
 
-  val path = Paths.get("ONNXAlgebra.scala");
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
+  implicit final class AnyOps[A](self: A) {
+    def ===(other: A): Boolean = self == other
+  }
+
+  val path = Paths.get("src/main/scala/ONNXAlgebra.scala");
 
   val attrMap = Array("Float",
                       "Int",
@@ -18,7 +43,8 @@ object ONNXAlgebraGenerator extends App {
                       "Seq[GRAPH???]").zipWithIndex.toMap
   val attrTypeMap = for ((k, v) <- attrMap) yield (v, k)
 
-  org.bytedeco.javacpp.Loader.load(classOf[org.bytedeco.javacpp.onnx])
+  val loaded =
+    org.bytedeco.javacpp.Loader.load(classOf[org.bytedeco.javacpp.onnx])
 
   val schemas = org.bytedeco.javacpp.onnx.OpSchemaRegistry.get_all_schemas
   val schemasSize = schemas.size
@@ -63,7 +89,7 @@ object ONNXAlgebraGenerator extends App {
         val result =
           (attrIter.first.getString, attrTypeMap(attrIter.second.`type`))
         val required = attrIter.second.required
-        attrIter.increment
+        val incremented = attrIter.increment
         val str = "" + result._1
           .replaceAll("split", "splitAttr")
           .replaceAll("scale", "scaleAttr") + " : " + (if (required) ""
@@ -79,10 +105,10 @@ object ONNXAlgebraGenerator extends App {
 
     val requiredInputs = (0 until x._3.size.toInt)
       .map(y => x._3.get(y))
-      .filter(y => y.GetOption == 0)
+      .filter(y => y.GetOption === 0)
     val optionalInputs = (0 until x._3.size.toInt)
       .map(y => x._3.get(y))
-      .filter(y => y.GetOption == 1)
+      .filter(y => y.GetOption === 1)
 
     val traitString
       : String = "@free trait " + x._1 + " extends Operator" + " {\n" +
@@ -110,7 +136,6 @@ object ONNXAlgebraGenerator extends App {
         "example." + y.GetTypeStr.getString.replaceAll("tensor\\(int32\\)",
                                                        "Tensor[Int]"))
       .mkString(", ") + ")]\n" +
-//       attributesString +
       "\n}"
 
     (traitString, typeStringMap)
@@ -130,7 +155,7 @@ object ONNXAlgebraGenerator extends App {
     .filter(x => !x.contains("ATen"))
     .mkString("\n")
 
-  val fullSource = "package example\n\n" +
+  val fullSource = "package org.emergentorder.onnx\n\n" +
     "import freestyle.free._\n" +
     "import freestyle.free.implicits._\n" +
     "import spire.math.Number\n" +
@@ -147,12 +172,10 @@ object ONNXAlgebraGenerator extends App {
     "}\n" +
     traitStrings
 
-//  val traitSource = traitStrings.parse[Source].get.syntax
-
-  def generate() = {
+  def generate(): Unit = {
     val onnxSource = fullSource.parse[Source].get
 
-    Files.write(path, onnxSource.syntax.getBytes("UTF-8"));
+    val wrote = Files.write(path, onnxSource.syntax.getBytes("UTF-8"));
   }
 
   generate()
