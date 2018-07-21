@@ -3,7 +3,7 @@ settings(
   inThisBuild(List(
     organization := "org.emergentorder",
     scalaOrganization := "org.scala-lang",
-    scalaVersion := "2.12.4",
+    scalaVersion := "2.12.6",
     crossScalaVersions := Seq("2.11.12","2.12.4", "2.13.0-M3"),
     version      := "0.1.0-SNAPSHOT"
   )),
@@ -23,7 +23,7 @@ addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
       "ch.qos.logback" % "logback-classic" % "1.2.3",
       "com.github.pureconfig" %% "pureconfig" % "0.9.1",
-      "io.frees" % "frees-core_2.12" % "0.8.0"
+      "io.frees" % "frees-core_2.12" % "0.8.2"
        ),
 //    scalafixSettings,
     wartremoverErrors ++= Warts.allBut(Wart.PublicInference),
