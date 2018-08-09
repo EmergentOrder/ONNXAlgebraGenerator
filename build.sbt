@@ -4,18 +4,20 @@ settings(
     organization := "org.emergentorder",
     scalaOrganization := "org.scala-lang",
     scalaVersion := "2.12.6",
-    crossScalaVersions := Seq("2.11.12","2.12.4", "2.13.0-M3"),
+    crossScalaVersions := Seq("2.11.12","2.12.6", "2.13.0-M4"),
     version      := "0.1.0-SNAPSHOT"
   )),
   name := "onnx-freestyle-algebra-generator",
   resolvers += Resolver.mavenLocal,
+  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   resolvers += Resolver.jcenterRepo,
 addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full),
 // scalacOptions += "-Xplugin-require:macroparadise",
 //  scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise")), // macroparadise plugin doesn't work in repl yet.
   scalacOptions ++= Seq("-feature", "-unchecked", "-deprecation", "-Ywarn-unused-import", "-Ywarn-unused:locals,privates"),
     libraryDependencies ++= Seq( 
-      "org.bytedeco" % "javacpp" % "1.4.1",
+      "org.bytedeco" % "javacpp" % "1.4.3-SNAPSHOT",
+      "org.bytedeco.javacpp-presets" % "onnx-platform" % "1.2.2-1.4.3-SNAPSHOT",
       "org.scalatest" %% "scalatest" % "3.0.5-M1" % Test,
       "org.typelevel" %% "spire" % "0.15.0",
       "org.typelevel" %% "cats-core" % "1.1.0",

@@ -69,18 +69,44 @@ object ONNXAlgebraGenerator extends App {
             z =>
               typeConstraintParam.allowed_type_strs
                 .get(z)
-                .getString
-                .substring(7)
-                .capitalize
-                .dropRight(1))
-        allowedTypeStrings.map(z =>
-          (typeConstraintParam.type_param_str.getString + z -> (typeConstraintParam.type_param_str.getString, "  type " + typeConstraintParam.type_param_str.getString + z + " = Tensor[" + z
-            .replaceAll("Int32", "Int")
+                .getString match
+                {
+                  case s if s.startsWith("tensor(") =>  {
+                    val a = s.stripPrefix("tensor(").dropRight(1)
+                      (typeConstraintParam.type_param_str.getString + "Tensor" + a.capitalize -> (typeConstraintParam.type_param_str.getString, "  type " + typeConstraintParam.type_param_str.getString + "Tensor" + a.capitalize + " = Tensor[" + a.capitalize.replaceAll("Int32", "Int")
             .replaceAll("Int64", "Long")
-            .replaceAll("Bool", "Boolean") + "]" + "\n")))
+            .replaceAll("Int16", "Short")
+            .replaceAll("Int8", "Byte")
+            .replaceAll("Uint64", "ULong")
+            .replaceAll("Uint32", "UInt")
+            .replaceAll("Uint16", "UShort")
+            .replaceAll("Uint8", "UByte")
+            .replaceAll("Bool", "Boolean") + "]" + "\n"))
+                  }
+
+        case s => {
+            (typeConstraintParam.type_param_str.getString + s.capitalize -> (typeConstraintParam.type_param_str.getString, "  type " + typeConstraintParam.type_param_str.getString + s.capitalize + " =" + s.capitalize.replaceAll("Int32", "Int")
+            .replaceAll("Int64", "Long")
+            .replaceAll("Int16", "Short")
+            .replaceAll("Int8", "Byte")
+            .replaceAll("Uint64", "ULong")
+            .replaceAll("Uint32", "UInt")
+            .replaceAll("Uint16", "UShort")
+            .replaceAll("Uint8", "UByte")
+            .replaceAll("Bool", "Boolean") + "\n"))
+                }
+                }
+
+
+                )
+
+        allowedTypeStrings
       }
       .flatten
       .toMap
+   
+//      typeStringMap
+//  }
 
     //CAUTION: iterator, unsafe
     val attrIter = x._6.begin
@@ -133,8 +159,8 @@ object ONNXAlgebraGenerator extends App {
       ")\n" + "    : FS[(" + (0 until x._4.size.toInt)
       .map(y => x._4.get(y))
       .map(y =>
-        "example." + y.GetTypeStr.getString.replaceAll("tensor\\(int32\\)",
-                                                       "Tensor[Int]"))
+        "example." + y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)",
+                                                       "Tensor[Long]"))
       .mkString(", ") + ")]\n" +
       "\n}"
 
@@ -159,6 +185,10 @@ object ONNXAlgebraGenerator extends App {
     "import freestyle.free._\n" +
     "import freestyle.free.implicits._\n" +
     "import spire.math.Number\n" +
+    "import spire.math.UByte\n" +
+    "import spire.math.UShort\n" +
+    "import spire.math.UInt\n" +
+    "import spire.math.ULong\n" +
     "import scala.language.higherKinds\n\n" +
     "package object example {\n" +
     "  type Tensor[T] = Tuple2[Vector[T], Seq[Int]]\n" +
@@ -174,7 +204,6 @@ object ONNXAlgebraGenerator extends App {
 
   def generate(): Unit = {
     val onnxSource = fullSource.parse[Source].get
-
     val wrote = Files.write(path, onnxSource.syntax.getBytes("UTF-8"));
   }
 
