@@ -126,7 +126,7 @@ object ONNXAlgebraGenerator extends App {
           .replaceAll("scale", "scaleAttr") + " : " + (if (required) ""
                                                        else
                                                          "Option[") + "(" + result._2
-          .replaceAll("Tensor", "example.Tensor[Number]") + ")" + (if (required)
+          .replaceAll("Tensor", "Tensor[Number]") + ")" + (if (required)
                                                                      ""
                                                                    else
                                                                      "] = None")
@@ -166,7 +166,7 @@ object ONNXAlgebraGenerator extends App {
       requiredInputs(z)
         .map(y =>
           y.GetName.getString
-            .replaceAll("var", "someVar") + ": " + "example." + y.GetTypeStr.getString
+            .replaceAll("var", "someVar") + ": " + "" + y.GetTypeStr.getString
             .replaceAll("tensor\\(int64\\)", "Tensor[Long]") + ", " + y.GetName.getString + "name: String"
             )
         .mkString(", ") +
@@ -175,7 +175,7 @@ object ONNXAlgebraGenerator extends App {
         .map(y =>
           y.GetName.getString
             .replaceAll("var", "someVar")
-            .replaceAll("shape", "shapeInput") + ": " + "Option[example." + y.GetTypeStr.getString
+            .replaceAll("shape", "shapeInput") + ": " + "Option[" + y.GetTypeStr.getString
             .replaceAll("tensor\\(int64\\)", "Tensor[Long]") + "] = None")
         .mkString(", ") +
       (if (attributesStrings(z).size > 0 && (requiredInputs(z).size + optionalInputs(z).size) > 0)
@@ -184,7 +184,7 @@ object ONNXAlgebraGenerator extends App {
       ")\n" + "    : FS[(" + (0 until x._2(z)._4.size.toInt)
       .map(y => x._2(z)._4.get(y))
       .map(y =>
-        "example." + y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)",
+        "" + y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)",
                                                        "Tensor[Long]"))
       .mkString(", ") + ")]\n"
       }.distinct.mkString("\n") 
@@ -209,7 +209,7 @@ object ONNXAlgebraGenerator extends App {
     .filter(x => !x.contains("ATen"))
     .mkString("\n")
 
-  val fullSource = "package org.emergentorder.onnx\n\n" +
+  val fullSource = "package org.emergentorder\n\n" +
     "import freestyle.free._\n" +
     "import freestyle.free.implicits._\n" +
     "import spire.math.Number\n" +
@@ -218,17 +218,18 @@ object ONNXAlgebraGenerator extends App {
     "import spire.math.UInt\n" +
     "import spire.math.ULong\n" +
     "import scala.language.higherKinds\n\n" +
-    "package object example {\n" +
+    "package object onnx {\n" +
     "  type Tensor[T] = Tuple2[Vector[T], Seq[Int]]\n" +
     "  trait Operator\n" +
     typeStrings + "\n" +
-    "}\n" +
+//    "}\n" +
     "@free trait DataSource {\n" +
-    "  def inputData: FS[example.T]\n" +
-    "  def getParams(name: String): FS[example.T]\n" +
-    "  def getAttributes(name: String): FS[example.T]\n" +
+    "  def inputData: FS[T]\n" +
+    "  def getParams(name: String): FS[T]\n" +
+    "  def getAttributes(name: String): FS[T]\n" +
     "}\n" +
-    traitStrings
+    traitStrings +
+    "}\n"
 
   def generate(): Unit = {
     val onnxSource = fullSource.parse[Source].get
