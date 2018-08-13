@@ -46,7 +46,7 @@ object ONNXAlgebraGenerator extends App {
   val loaded =
     org.bytedeco.javacpp.Loader.load(classOf[org.bytedeco.javacpp.onnx])
 
-  val schemas = org.bytedeco.javacpp.onnx.OpSchemaRegistry.get_all_schemas
+  val schemas = org.bytedeco.javacpp.onnx.OpSchemaRegistry.get_all_schemas_with_history
   val schemasSize = schemas.size
   val scalaCollSchemas = (0 until schemasSize.toInt).map(x => schemas.get(x))
   val tuples = scalaCollSchemas.map(
@@ -56,12 +56,14 @@ object ONNXAlgebraGenerator extends App {
        x.inputs,
        x.outputs,
        x.typeConstraintParams,
-       x.attributes))
+       x.attributes)).groupBy(_._1)
+         //.map(y => (y._1, y._2.distinct))
+//  tuples.foreach( y => println(y._2))
 
   val traitStringsAndTypeStrings = tuples.map { x =>
-    val typeConstraintParams = x._5
-
-    val typeStringMap = (0 until x._5.size.toInt)
+    val typeStringMap = x._2.map{b =>
+      val typeConstraintParams = b._5
+      (0 until typeConstraintParams.size.toInt)
       .map { y =>
         val typeConstraintParam = typeConstraintParams.get(y)
         val allowedTypeStrings =
@@ -102,6 +104,7 @@ object ONNXAlgebraGenerator extends App {
 
         allowedTypeStrings
       }
+    }.flatten
       .flatten
       .toMap
    
@@ -109,8 +112,10 @@ object ONNXAlgebraGenerator extends App {
 //  }
 
     //CAUTION: iterator, unsafe
-    val attrIter = x._6.begin
-    val attributesString: String = (0 until x._6.size.toInt)
+//    val attrIter = x._6.begin
+    val attributesStrings: Seq[String] = x._2.map{z =>
+        val attrIter = z._6.begin
+        (0 until z._6.size.toInt)
       .map { y =>
         val result =
           (attrIter.first.getString, attrTypeMap(attrIter.second.`type`))
@@ -128,41 +133,64 @@ object ONNXAlgebraGenerator extends App {
         str
       }
       .mkString(",")
+    }
 
-    val requiredInputs = (0 until x._3.size.toInt)
-      .map(y => x._3.get(y))
-      .filter(y => y.GetOption === 0)
-    val optionalInputs = (0 until x._3.size.toInt)
-      .map(y => x._3.get(y))
-      .filter(y => y.GetOption === 1)
+    val requiredInputs = x._2.map{y =>
+      (0 until y._3.size.toInt)
+      .map(z => y._3.get(z))
+      .filter(z => z.GetOption === 0)
+    }
+    val optionalInputs = x._2.map{y =>
+      (0 until y._3.size.toInt)
+      .map(z => y._3.get(z))
+      .filter(z => z.GetOption === 1)
+    }
 
-    val traitString
-      : String = "@free trait " + x._1 + " extends Operator" + " {\n" +
-      "\n  def " + x._1 + "(" +
-      requiredInputs
+    val maxSinceVersion = (x._2.map(z => z._2) foldLeft 0)(Math.max)
+
+        val beginString = "@free trait " + x._1 + " extends Operator" + " {\n"
+
+      //  val opts = optionalInputs.map(g => g.map(h => h.GetTypeStr.getString))
+      //  if(x._1 === "Add") println(opts)
+        val defStrings = (0 until 
+          requiredInputs.size).map {z =>
+   //       scala.math.max(requiredInputs.map(g => g.map(h => h.GetTypeStr.getString)).distinct.size,
+     //       attributesStrings.distinct.size)).map{z =>
+                             //                    optionalInputs.map(g => g.map(h => h.GetTypeStr.getString)).distinct.size)).map {z =>
+      "\n  def " + x._1 +
+//      (if(x._2(z)._2 < maxSinceVersion) x._2(z)._2.toString else "") +
+      x._2(z)._2.toString +
+      "(" + 
+      "name: String" +
+      (if (requiredInputs(z).size > 0 || optionalInputs(z).size > 0) "," else "") +
+      requiredInputs(z)
         .map(y =>
           y.GetName.getString
             .replaceAll("var", "someVar") + ": " + "example." + y.GetTypeStr.getString
-            .replaceAll("tensor\\(int64\\)", "Tensor[Long]"))
+            .replaceAll("tensor\\(int64\\)", "Tensor[Long]") + ", " + y.GetName.getString + "name: String"
+            )
         .mkString(", ") +
-      (if (requiredInputs.size > 0 && optionalInputs.size > 0) "," else "") +
-      optionalInputs
+      (if (requiredInputs(z).size > 0 && optionalInputs(z).size > 0) "," else "") +
+      optionalInputs(z)
         .map(y =>
           y.GetName.getString
             .replaceAll("var", "someVar")
             .replaceAll("shape", "shapeInput") + ": " + "Option[example." + y.GetTypeStr.getString
             .replaceAll("tensor\\(int64\\)", "Tensor[Long]") + "] = None")
         .mkString(", ") +
-      (if (attributesString.size > 0 && (requiredInputs.size + optionalInputs.size) > 0)
-         "," + attributesString
+      (if (attributesStrings(z).size > 0 && (requiredInputs(z).size + optionalInputs(z).size) > 0)
+         "," + attributesStrings(z)
        else "") +
-      ")\n" + "    : FS[(" + (0 until x._4.size.toInt)
-      .map(y => x._4.get(y))
+      ")\n" + "    : FS[(" + (0 until x._2(z)._4.size.toInt)
+      .map(y => x._2(z)._4.get(y))
       .map(y =>
         "example." + y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)",
                                                        "Tensor[Long]"))
-      .mkString(", ") + ")]\n" +
-      "\n}"
+      .mkString(", ") + ")]\n"
+      }.distinct.mkString("\n") 
+      val endString = "\n}"
+
+      val traitString = beginString + defStrings + endString
 
     (traitString, typeStringMap)
   }
