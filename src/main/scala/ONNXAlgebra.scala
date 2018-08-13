@@ -10,7 +10,7 @@ import spire.math.ULong
 import scala.language.higherKinds
 
 package object onnx {
-  type Tensor[T] = Tuple2[Vector[T], Seq[Int]]
+  type Tensor[U] = Tuple2[Vector[U], Seq[Int]]
   trait Operator
   type TTensorFloat16 = Tensor[Float16]
 

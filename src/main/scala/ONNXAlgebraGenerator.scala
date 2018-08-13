@@ -219,7 +219,7 @@ object ONNXAlgebraGenerator extends App {
     "import spire.math.ULong\n" +
     "import scala.language.higherKinds\n\n" +
     "package object onnx {\n" +
-    "  type Tensor[T] = Tuple2[Vector[T], Seq[Int]]\n" +
+    "  type Tensor[U] = Tuple2[Vector[U], Seq[Int]]\n" +
     "  trait Operator\n" +
     typeStrings + "\n" +
 //    "}\n" +
