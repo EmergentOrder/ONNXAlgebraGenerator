@@ -13,6 +13,7 @@
  * limitations under the License.
 */
 //Adapted from https://gist.github.com/non/29f8d66036afca402f96
+//Other options on SO / in Android source
 
 package org.emergentorder.onnx
 
