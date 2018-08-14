@@ -126,7 +126,7 @@ object ONNXAlgebraGenerator extends App {
           .replaceAll("scale", "scaleAttr") + " : " + (if (required) ""
                                                        else
                                                          "Option[") + "(" + result._2
-          .replaceAll("Tensor", "Tensor[Number]") + ")" + (if (required)
+          .replaceAll("Tensor", "Tensor[VV]") + ")" + (if (required)
                                                                      ""
                                                                    else
                                                                      "] = None")
@@ -160,14 +160,15 @@ object ONNXAlgebraGenerator extends App {
       "\n  def " + x._1 +
 //      (if(x._2(z)._2 < maxSinceVersion) x._2(z)._2.toString else "") +
       x._2(z)._2.toString +
-      "(" + 
+      "[VV : spire.math.Numeric:ClassTag](" + 
       "name: String" +
       (if (requiredInputs(z).size > 0 || optionalInputs(z).size > 0) "," else "") +
       requiredInputs(z)
         .map(y =>
           y.GetName.getString
             .replaceAll("var", "someVar") + ": " + "" + y.GetTypeStr.getString
-            .replaceAll("tensor\\(int64\\)", "Tensor[Long]") + ", " + y.GetName.getString + "name: String"
+            .replaceAll("B", "T").replaceAll("V", "T").replaceAll("I", "T")
+            .replaceAll("T1", "T").replaceAll("Tind", "T").replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)", "Tensor[Long]") + ", " + y.GetName.getString + "name: String"
             )
         .mkString(", ") +
       (if (requiredInputs(z).size > 0 && optionalInputs(z).size > 0) "," else "") +
@@ -176,7 +177,7 @@ object ONNXAlgebraGenerator extends App {
           y.GetName.getString
             .replaceAll("var", "someVar")
             .replaceAll("shape", "shapeInput") + ": " + "Option[" + y.GetTypeStr.getString
-            .replaceAll("tensor\\(int64\\)", "Tensor[Long]") + "] = None")
+            .replaceAll("T1", "T").replaceAll("Tind", "T").replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)", "Tensor[Long]") + "] = None")
         .mkString(", ") +
       (if (attributesStrings(z).size > 0 && (requiredInputs(z).size + optionalInputs(z).size) > 0)
          "," + attributesStrings(z)
@@ -184,7 +185,9 @@ object ONNXAlgebraGenerator extends App {
       ")\n" + "    : FS[(" + (0 until x._2(z)._4.size.toInt)
       .map(y => x._2(z)._4.get(y))
       .map(y =>
-        "" + y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)",
+        "" + y.GetTypeStr.getString.replaceAll("T2", "T")
+           .replaceAll("B", "T").replaceAll("V", "T").replaceAll("I", "T")
+           .replaceAll("T1", "T").replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)",
                                                        "Tensor[Long]"))
       .mkString(", ") + ")]\n"
       }.distinct.mkString("\n") 
@@ -200,7 +203,7 @@ object ONNXAlgebraGenerator extends App {
   val typeStrings = flattenedTypeStringsMap.values
     .map(z => z._2)
     .mkString("\n") + flattenedTypeStringsMap.values
-    .map(z => "  type " + z._1 + " = Tensor[Number]")
+    .map(z => "  type " + z._1 + "[VV] = Tensor[VV]")
     .toList
     .distinct
     .mkString("\n")
@@ -212,11 +215,14 @@ object ONNXAlgebraGenerator extends App {
   val fullSource = "package org.emergentorder\n\n" +
     "import freestyle.free._\n" +
     "import freestyle.free.implicits._\n" +
-    "import spire.math.Number\n" +
+//    "import spire.math.Number\n" +
     "import spire.math.UByte\n" +
     "import spire.math.UShort\n" +
     "import spire.math.UInt\n" +
     "import spire.math.ULong\n" +
+    "import spire.math._\n" +
+    "import spire.implicits._\n" +
+    "import scala.reflect.ClassTag\n" +
     "import scala.language.higherKinds\n\n" +
     "package object onnx {\n" +
     "  type Tensor[U] = Tuple2[Vector[U], Seq[Int]]\n" +
@@ -224,9 +230,9 @@ object ONNXAlgebraGenerator extends App {
     typeStrings + "\n" +
 //    "}\n" +
     "@free trait DataSource {\n" +
-    "  def inputData: FS[T]\n" +
-    "  def getParams(name: String): FS[T]\n" +
-    "  def getAttributes(name: String): FS[T]\n" +
+    "  def inputData[VV:spire.math.Numeric:ClassTag]: FS[Tensor[VV]]\n" +
+    "  def getParams[VV:spire.math.Numeric:ClassTag](name: String): FS[Tensor[VV]]\n" +
+    "  def getAttributes[VV:spire.math.Numeric:ClassTag](name: String): FS[Tensor[VV]]\n" +
     "}\n" +
     traitStrings +
     "}\n"
