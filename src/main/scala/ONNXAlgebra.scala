@@ -1,15 +1,11 @@
 package org.emergentorder
 
-import freestyle.free._
-import freestyle.free.implicits._
 import spire.math.UByte
 import spire.math.UShort
 import spire.math.UInt
 import spire.math.ULong
-import spire.math._
-import spire.implicits._
+import spire.math.Numeric
 import scala.reflect.ClassTag
-import scala.language.higherKinds
 
 package object onnx {
   type Tensor[U] = Tuple2[Vector[U], Seq[Int]]
@@ -136,924 +132,924 @@ package object onnx {
   type B[VV] = Tensor[VV]
   type Tind[VV] = Tensor[VV]
   type I[VV] = Tensor[VV]
-@free trait DataSource {
-  def inputData[VV:spire.math.Numeric:ClassTag]: FS[Tensor[VV]]
-  def getParams[VV:spire.math.Numeric:ClassTag](name: String): FS[Tensor[VV]]
-  def getAttributes[VV:spire.math.Numeric:ClassTag](name: String): FS[Tensor[VV]]
+trait DataSource {
+  def inputData[VV:Numeric:ClassTag]: Tensor[VV]
+  def getParams[VV:Numeric:ClassTag](name: String): Tensor[VV]
+  def getAttributes[VV:Numeric:ClassTag](name: String): Tensor[VV]
 }
-@free trait Size extends Operator {
+trait InstanceNormalization extends Operator {
 
-  def Size1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String)
-    : FS[(T[VV])]
+  def InstanceNormalization1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String, scale: T[VV], scalename: String, B: T[VV], Bname: String,consumed_inputs : Option[(Seq[String])] = None,epsilon : Option[(Int)] = None)
+    : (T[VV])
 
-}
-@free trait Cast extends Operator {
 
-  def Cast1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,to : (Tensor[VV]))
-    : FS[(T[VV])]
+  def InstanceNormalization6[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String, scale: T[VV], scalename: String, B: T[VV], Bname: String,epsilon : Option[(Int)] = None)
+    : (T[VV])
 
+}
+trait Multinomial extends Operator {
 
-  def Cast6[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,to : (String))
-    : FS[(T[VV])]
+  def Multinomial7[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,dtype : Option[(String)] = None,sample_size : Option[(String)] = None,seed : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait Softmax extends Operator {
+trait LpPool extends Operator {
 
-  def Softmax1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None)
-    : FS[(T[VV])]
+  def LpPool1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,auto_pad : Option[(Tensor[VV])] = None,kernel_shape : Option[(Seq[String])] = None,p : Option[(Int)] = None,pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
+    : (T[VV])
 
-}
-@free trait InstanceNormalization extends Operator {
 
-  def InstanceNormalization1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String, scale: T[VV], scalename: String, B: T[VV], Bname: String,consumed_inputs : Option[(Seq[String])] = None,epsilon : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def LpPool2[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,auto_pad : Option[(Tensor[VV])] = None,kernel_shape : (Seq[String]),p : Option[(String)] = None,pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
+    : (T[VV])
 
+}
+trait ReduceMean extends Operator {
 
-  def InstanceNormalization6[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String, scale: T[VV], scalename: String, B: T[VV], Bname: String,epsilon : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def ReduceMean1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait Add extends Operator {
+trait Greater extends Operator {
 
-  def Add1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Greater1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : (T[VV])
 
 
-  def Add6[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Greater7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : (T[VV])
 
+}
+trait Identity extends Operator {
 
-  def Add7[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def Identity1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
+    : (T[VV])
 
 }
-@free trait Or extends Operator {
+trait MaxRoiPool extends Operator {
 
-  def Or1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
+  def MaxRoiPool1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, rois: T[VV], roisname: String,pooled_shape : (Seq[String]),spatial_scaleAttr : Option[(Int)] = None)
+    : (T[VV])
 
+}
+trait Affine extends Operator {
 
-  def Or7[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def Affine1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait LSTM extends Operator {
+trait Elu extends Operator {
 
-  def LSTM1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None, initial_c: Option[T[VV]] = None, P: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,input_forget : Option[(String)] = None,output_sequence : Option[(String)] = None)
-    : FS[(T[VV], T[VV], T[VV])]
+  def Elu1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def LSTM7[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None, initial_c: Option[T[VV]] = None, P: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,input_forget : Option[(String)] = None)
-    : FS[(T[VV], T[VV], T[VV])]
+  def Elu6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait LoopIndexTensor extends Operator {
+trait RandomUniform extends Operator {
 
-  def LoopIndexTensor1[VV : spire.math.Numeric:ClassTag](name: String,T: T[VV], Tname: String, loop_idx: T[VV], loop_idxname: String,axis : Option[(String)] = None)
-    : FS[(T[VV])]
+  def RandomUniform1[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
 
 }
-@free trait Relu extends Operator {
+trait GRU extends Operator {
 
-  def Relu1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def GRU1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,output_sequence : Option[(String)] = None)
+    : (T[VV], T[VV])
 
 
-  def Relu6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
+  def GRU3[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,linear_before_reset : Option[(String)] = None,output_sequence : Option[(String)] = None)
+    : (T[VV], T[VV])
 
-}
-@free trait Constant extends Operator {
 
-  def Constant1[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
+  def GRU7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,linear_before_reset : Option[(String)] = None)
+    : (T[VV], T[VV])
 
 }
-@free trait ArgMin extends Operator {
+trait Softplus extends Operator {
 
-  def ArgMin1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axis : Option[(String)] = None,keepdims : Option[(String)] = None)
-    : FS[(Tensor[Long])]
+  def Softplus1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
 }
-@free trait MaxPool extends Operator {
+trait Loop extends Operator {
 
-  def MaxPool1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,auto_pad : Option[(Tensor[VV])] = None,kernel_shape : (Seq[String]),pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Loop1[VV : Numeric:ClassTag](name: String,M: T[VV], Mname: String, cond: T[VV], condname: String,body : (Seq[Float]))
+    : (T[VV])
 
 }
-@free trait Softsign extends Operator {
+trait Pow extends Operator {
 
-  def Softsign1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
+  def Pow1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, Y: T[VV], Yname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : (T[VV])
 
-}
-@free trait RNN extends Operator {
 
-  def RNN1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,output_sequence : Option[(String)] = None)
-    : FS[(T[VV], T[VV])]
+  def Pow7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, Y: T[VV], Yname: String)
+    : (T[VV])
 
+}
+trait Tanh extends Operator {
 
-  def RNN7[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None)
-    : FS[(T[VV], T[VV])]
+  def Tanh1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
-}
-@free trait Sin extends Operator {
 
-  def Sin7[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
+  def Tanh6[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
+    : (T[VV])
 
 }
-@free trait ArgMax extends Operator {
+trait Equal extends Operator {
 
-  def ArgMax1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axis : Option[(String)] = None,keepdims : Option[(String)] = None)
-    : FS[(Tensor[Long])]
+  def Equal1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : (T[VV])
 
-}
-@free trait ReduceLogSumExp extends Operator {
 
-  def ReduceLogSumExp1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Equal7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : (T[VV])
 
 }
-@free trait ReduceL2 extends Operator {
+trait TopK extends Operator {
 
-  def ReduceL21[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
-    : FS[(T[VV])]
+  def TopK1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,axis : Option[(String)] = None,k : (String))
+    : (T[VV], T[VV])
 
 }
-@free trait Selu extends Operator {
+trait Selu extends Operator {
 
-  def Selu1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,consumed_inputs : Option[(Seq[String])] = None,gamma : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Selu1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,consumed_inputs : Option[(Seq[String])] = None,gamma : Option[(Int)] = None)
+    : (T[VV])
 
 
-  def Selu6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,gamma : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Selu6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,gamma : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait RandomNormalLike extends Operator {
+trait ConvTranspose extends Operator {
 
-  def RandomNormalLike1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,dtype : Option[(String)] = None,mean : Option[(Int)] = None,scaleAttr : Option[(Int)] = None,seed : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def ConvTranspose1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String,B: Option[T[VV]] = None,auto_pad : Option[(Tensor[VV])] = None,dilations : Option[(Seq[String])] = None,group : Option[(String)] = None,kernel_shape : Option[(Seq[String])] = None,output_padding : Option[(Seq[String])] = None,output_shape : Option[(Seq[String])] = None,pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
+    : (T[VV])
 
 }
-@free trait GlobalAveragePool extends Operator {
+trait Max extends Operator {
+
+  def Max1[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
 
-  def GlobalAveragePool1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
 
+  def Max6[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
+
 }
-@free trait Slice extends Operator {
+trait Gather extends Operator {
 
-  def Slice1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,ends : (Seq[String]),starts : (Seq[String]))
-    : FS[(T[VV])]
+  def Gather1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String, indices: T[VV], indicesname: String,axis : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait BatchNormalization extends Operator {
+trait Neg extends Operator {
 
-  def BatchNormalization1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, scale: T[VV], scalename: String, B: T[VV], Bname: String, mean: T[VV], meanname: String, someVar: T[VV], varname: String,consumed_inputs : (Seq[String]),epsilon : Option[(Int)] = None,is_test : Option[(String)] = None,momentum : Option[(Int)] = None,spatial : Option[(String)] = None)
-    : FS[(T[VV], T[VV], T[VV], T[VV], T[VV])]
+  def Neg1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def BatchNormalization6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, scale: T[VV], scalename: String, B: T[VV], Bname: String, mean: T[VV], meanname: String, someVar: T[VV], varname: String,epsilon : Option[(Int)] = None,is_test : Option[(String)] = None,momentum : Option[(Int)] = None,spatial : Option[(String)] = None)
-    : FS[(T[VV], T[VV], T[VV], T[VV], T[VV])]
+  def Neg6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
+}
+trait DepthToSpace extends Operator {
 
-  def BatchNormalization7[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, scale: T[VV], scalename: String, B: T[VV], Bname: String, mean: T[VV], meanname: String, someVar: T[VV], varname: String,epsilon : Option[(Int)] = None,momentum : Option[(Int)] = None,spatial : Option[(String)] = None)
-    : FS[(T[VV], T[VV], T[VV], T[VV], T[VV])]
+  def DepthToSpace1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,blocksize : (String))
+    : (T[VV])
 
 }
-@free trait ReduceMin extends Operator {
+trait MeanVarianceNormalization extends Operator {
 
-  def ReduceMin1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
-    : FS[(T[VV])]
+  def MeanVarianceNormalization1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,across_channels : Option[(String)] = None,normalize_variance : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait Reshape extends Operator {
+trait Add extends Operator {
 
-  def Reshape1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,consumed_inputs : Option[(Seq[String])] = None,shape : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Add1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def Reshape5[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String, shape: Tensor[Long], shapename: String)
-    : FS[(T[VV])]
+  def Add6[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : (T[VV])
 
-}
-@free trait Atan extends Operator {
 
-  def Atan7[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
+  def Add7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : (T[VV])
 
 }
-@free trait ReduceProd extends Operator {
+trait Or extends Operator {
+
+  def Or1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : (T[VV])
 
-  def ReduceProd1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
-    : FS[(T[VV])]
 
+  def Or7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : (T[VV])
+
 }
-@free trait Sqrt extends Operator {
+trait Dropout extends Operator {
 
-  def Sqrt1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Dropout1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,consumed_inputs : Option[(Seq[String])] = None,is_test : Option[(String)] = None,ratio : Option[(Int)] = None)
+    : (T[VV], T[VV])
 
 
-  def Sqrt6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
+  def Dropout6[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,is_test : Option[(String)] = None,ratio : Option[(Int)] = None)
+    : (T[VV], T[VV])
 
-}
-@free trait If extends Operator {
 
-  def If1[VV : spire.math.Numeric:ClassTag](name: String,cond: T[VV], condname: String,else_branch : (Seq[Float]),then_branch : (Seq[Float]))
-    : FS[(T[VV])]
+  def Dropout7[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,ratio : Option[(Int)] = None)
+    : (T[VV], T[VV])
 
 }
-@free trait Ceil extends Operator {
+trait Sqrt extends Operator {
 
-  def Ceil1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Sqrt1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def Ceil6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
+  def Sqrt6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
 }
-@free trait Acos extends Operator {
+trait Transpose extends Operator {
 
-  def Acos7[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
+  def Transpose1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,perm : Option[(Seq[String])] = None)
+    : (T[VV])
 
 }
-@free trait SpaceToDepth extends Operator {
+trait ReduceMax extends Operator {
 
-  def SpaceToDepth1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,blocksize : (String))
-    : FS[(T[VV])]
+  def ReduceMax1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait Identity extends Operator {
+trait GlobalMaxPool extends Operator {
 
-  def Identity1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
+  def GlobalMaxPool1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
 }
-@free trait ReduceMean extends Operator {
+trait Upsample extends Operator {
+
+  def Upsample1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,height_scaleAttr : (Int),mode : Option[(Tensor[VV])] = None,width_scaleAttr : (Int))
+    : (T[VV])
+
 
-  def ReduceMean1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Upsample7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,mode : Option[(Tensor[VV])] = None,scaleAttrs : (Seq[Int]))
+    : (T[VV])
 
 }
-@free trait Concat extends Operator {
+trait Min extends Operator {
 
-  def Concat1[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
+  def Min1[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
 
 
-  def Concat4[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
+  def Min6[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
 
 }
-@free trait Cos extends Operator {
+trait GivenTensorFill extends Operator {
 
-  def Cos7[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
+  def GivenTensorFill1[VV : Numeric:ClassTag](name: String,shapeInput: Option[T[VV]] = None,extra_shape : Option[(Seq[String])] = None,input_as_shape : Option[(String)] = None,shape : Option[(Seq[String])] = None,values : Option[(Seq[Int])] = None)
+    : (T[VV])
 
 }
-@free trait Scale extends Operator {
+trait RandomNormalLike extends Operator {
 
-  def Scale1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,scaleAttr : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def RandomNormalLike1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,dtype : Option[(String)] = None,mean : Option[(Int)] = None,scaleAttr : Option[(Int)] = None,seed : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait Gather extends Operator {
+trait Squeeze extends Operator {
 
-  def Gather1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String, indices: T[VV], indicesname: String,axis : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Squeeze1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : (Seq[String]))
+    : (T[VV])
 
 }
-@free trait HardSigmoid extends Operator {
+trait LoopIndexTensor extends Operator {
 
-  def HardSigmoid1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def LoopIndexTensor1[VV : Numeric:ClassTag](name: String,T: T[VV], Tname: String, loop_idx: T[VV], loop_idxname: String,axis : Option[(String)] = None)
+    : (T[VV])
 
+}
+trait Tan extends Operator {
 
-  def HardSigmoid6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Tan7[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
+    : (T[VV])
 
 }
-@free trait PRelu extends Operator {
+trait GlobalLpPool extends Operator {
 
-  def PRelu1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, slope: T[VV], slopename: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def GlobalLpPool1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,p : Option[(Int)] = None)
+    : (T[VV])
 
 
-  def PRelu6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, slope: T[VV], slopename: String)
-    : FS[(T[VV])]
+  def GlobalLpPool2[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,p : Option[(String)] = None)
+    : (T[VV])
 
+}
+trait Reshape extends Operator {
 
-  def PRelu7[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, slope: T[VV], slopename: String)
-    : FS[(T[VV])]
+  def Reshape1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,consumed_inputs : Option[(Seq[String])] = None,shape : Option[(Seq[String])] = None)
+    : (T[VV])
 
-}
-@free trait Squeeze extends Operator {
 
-  def Squeeze1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : (Seq[String]))
-    : FS[(T[VV])]
+  def Reshape5[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String, shape: Tensor[Long], shapename: String)
+    : (T[VV])
 
 }
-@free trait MatMul extends Operator {
+trait ArgMin extends Operator {
 
-  def MatMul1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def ArgMin1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axis : Option[(String)] = None,keepdims : Option[(String)] = None)
+    : (Tensor[Long])
 
 }
-@free trait ConstantFill extends Operator {
+trait ConstantFill extends Operator {
 
-  def ConstantFill1[VV : spire.math.Numeric:ClassTag](name: String,input: Option[T[VV]] = None,dtype : Option[(String)] = None,extra_shape : Option[(Seq[String])] = None,input_as_shape : Option[(String)] = None,shape : Option[(Seq[String])] = None,value : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def ConstantFill1[VV : Numeric:ClassTag](name: String,input: Option[T[VV]] = None,dtype : Option[(String)] = None,extra_shape : Option[(Seq[String])] = None,input_as_shape : Option[(String)] = None,shape : Option[(Seq[String])] = None,value : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait Abs extends Operator {
+trait LeakyRelu extends Operator {
 
-  def Abs1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def LeakyRelu1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def Abs6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
+  def LeakyRelu6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait DepthToSpace extends Operator {
+trait Softmax extends Operator {
 
-  def DepthToSpace1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,blocksize : (String))
-    : FS[(T[VV])]
+  def Softmax1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait Max extends Operator {
-
-  def Max1[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
+trait LRN extends Operator {
 
+  def LRN1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None,bias : Option[(Int)] = None,size : (String))
+    : (T[VV])
 
-  def Max6[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
-
 }
-@free trait ThresholdedRelu extends Operator {
+trait Size extends Operator {
 
-  def ThresholdedRelu1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Size1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String)
+    : (T[VV])
 
 }
-@free trait Equal extends Operator {
+trait ReduceL1 extends Operator {
 
-  def Equal1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
+  def ReduceL11[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
+    : (T[VV])
 
+}
+trait GRUUnit extends Operator {
 
-  def Equal7[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def GRUUnit1[VV : Numeric:ClassTag](name: String,hidden_prev: T[VV], hidden_prevname: String, gates: T[VV], gatesname: String, seq_lengths: T[VV], seq_lengthsname: String, t: T[VV], tname: String,drop_states : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait ParametricSoftplus extends Operator {
+trait Clip extends Operator {
 
-  def ParametricSoftplus1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Clip1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,consumed_inputs : Option[(Seq[String])] = None,max : Option[(Int)] = None,min : Option[(Int)] = None)
+    : (T[VV])
 
-}
-@free trait MaxRoiPool extends Operator {
 
-  def MaxRoiPool1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, rois: T[VV], roisname: String,pooled_shape : (Seq[String]),spatial_scaleAttr : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Clip6[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,max : Option[(Int)] = None,min : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait LogSoftmax extends Operator {
+trait MaxPool extends Operator {
 
-  def LogSoftmax1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None)
-    : FS[(T[VV])]
+  def MaxPool1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,auto_pad : Option[(Tensor[VV])] = None,kernel_shape : (Seq[String]),pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
+    : (T[VV])
 
 }
-@free trait Pow extends Operator {
+trait Softsign extends Operator {
 
-  def Pow1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, Y: T[VV], Yname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Softsign1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
+    : (T[VV])
 
+}
+trait Shape extends Operator {
 
-  def Pow7[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, Y: T[VV], Yname: String)
-    : FS[(T[VV])]
+  def Shape1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String)
+    : (T[VV])
 
 }
-@free trait RandomUniform extends Operator {
+trait HardSigmoid extends Operator {
 
-  def RandomUniform1[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
+  def HardSigmoid1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
-}
-@free trait GRUUnit extends Operator {
 
-  def GRUUnit1[VV : spire.math.Numeric:ClassTag](name: String,hidden_prev: T[VV], hidden_prevname: String, gates: T[VV], gatesname: String, seq_lengths: T[VV], seq_lengthsname: String, t: T[VV], tname: String,drop_states : Option[(String)] = None)
-    : FS[(T[VV])]
+  def HardSigmoid6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait TopK extends Operator {
+trait ReduceSumSquare extends Operator {
 
-  def TopK1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,axis : Option[(String)] = None,k : (String))
-    : FS[(T[VV], T[VV])]
+  def ReduceSumSquare1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait Gemm extends Operator {
+trait ScaledTanh extends Operator {
 
-  def Gemm1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String, C: T[VV], Cname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None,broadcast : Option[(String)] = None,transA : Option[(String)] = None,transB : Option[(String)] = None)
-    : FS[(T[VV])]
+  def ScaledTanh1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None)
+    : (T[VV])
 
+}
+trait Pad extends Operator {
 
-  def Gemm6[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String, C: T[VV], Cname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None,broadcast : Option[(String)] = None,transA : Option[(String)] = None,transB : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Pad1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,mode : Option[(Tensor[VV])] = None,paddings : (Seq[String]),value : Option[(Int)] = None)
+    : (T[VV])
 
 
-  def Gemm7[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String, C: T[VV], Cname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None,transA : Option[(String)] = None,transB : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Pad2[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,mode : Option[(Tensor[VV])] = None,pads : (Seq[String]),value : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait Tanh extends Operator {
-
-  def Tanh1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
-
+trait Unsqueeze extends Operator {
 
-  def Tanh6[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
+  def Unsqueeze1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : (Seq[String]))
+    : (T[VV])
 
 }
-@free trait LeakyRelu extends Operator {
+trait ReduceSum extends Operator {
 
-  def LeakyRelu1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def ReduceSum1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
+    : (T[VV])
 
+}
+trait ParametricSoftplus extends Operator {
 
-  def LeakyRelu6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def ParametricSoftplus1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait ConvTranspose extends Operator {
+trait ReduceLogSumExp extends Operator {
 
-  def ConvTranspose1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String,B: Option[T[VV]] = None,auto_pad : Option[(Tensor[VV])] = None,dilations : Option[(Seq[String])] = None,group : Option[(String)] = None,kernel_shape : Option[(Seq[String])] = None,output_padding : Option[(Seq[String])] = None,output_shape : Option[(Seq[String])] = None,pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def ReduceLogSumExp1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait Clip extends Operator {
+trait If extends Operator {
 
-  def Clip1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,consumed_inputs : Option[(Seq[String])] = None,max : Option[(Int)] = None,min : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def If1[VV : Numeric:ClassTag](name: String,cond: T[VV], condname: String,else_branch : (Seq[Float]),then_branch : (Seq[Float]))
+    : (T[VV])
 
+}
+trait Exp extends Operator {
 
-  def Clip6[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,max : Option[(Int)] = None,min : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Exp1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
-}
-@free trait ReduceLogSum extends Operator {
 
-  def ReduceLogSum1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Exp6[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
+    : (T[VV])
 
 }
-@free trait GlobalLpPool extends Operator {
+trait Reciprocal extends Operator {
 
-  def GlobalLpPool1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,p : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Reciprocal1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def GlobalLpPool2[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,p : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Reciprocal6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
 }
-@free trait Floor extends Operator {
+trait Gemm extends Operator {
 
-  def Floor1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Gemm1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String, C: T[VV], Cname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None,broadcast : Option[(String)] = None,transA : Option[(String)] = None,transB : Option[(String)] = None)
+    : (T[VV])
 
 
-  def Floor6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
+  def Gemm6[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String, C: T[VV], Cname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None,broadcast : Option[(String)] = None,transA : Option[(String)] = None,transB : Option[(String)] = None)
+    : (T[VV])
 
-}
-@free trait GivenTensorFill extends Operator {
 
-  def GivenTensorFill1[VV : spire.math.Numeric:ClassTag](name: String,shapeInput: Option[T[VV]] = None,extra_shape : Option[(Seq[String])] = None,input_as_shape : Option[(String)] = None,shape : Option[(Seq[String])] = None,values : Option[(Seq[Int])] = None)
-    : FS[(T[VV])]
+  def Gemm7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String, C: T[VV], Cname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None,transA : Option[(String)] = None,transB : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait Loop extends Operator {
+trait ReduceL2 extends Operator {
 
-  def Loop1[VV : spire.math.Numeric:ClassTag](name: String,M: T[VV], Mname: String, cond: T[VV], condname: String,body : (Seq[Float]))
-    : FS[(T[VV])]
+  def ReduceL21[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait AveragePool extends Operator {
+trait Tile extends Operator {
 
-  def AveragePool1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,auto_pad : Option[(Tensor[VV])] = None,kernel_shape : (Seq[String]),pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Tile1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String, tiles: T[VV], tilesname: String, axis: T[VV], axisname: String)
+    : (T[VV])
 
 
-  def AveragePool7[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,auto_pad : Option[(Tensor[VV])] = None,count_include_pad : Option[(String)] = None,kernel_shape : (Seq[String]),pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Tile6[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String, repeats: T[VV], repeatsname: String)
+    : (T[VV])
 
 }
-@free trait Crop extends Operator {
+trait LpNormalization extends Operator {
 
-  def Crop1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,border : Option[(Seq[String])] = None,scaleAttr : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def LpNormalization1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None,p : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait Min extends Operator {
+trait Abs extends Operator {
 
-  def Min1[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
+  def Abs1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def Min6[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
+  def Abs6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
 }
-@free trait Softplus extends Operator {
+trait Log extends Operator {
 
-  def Softplus1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
+  def Log1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
-}
-@free trait ReduceSum extends Operator {
 
-  def ReduceSum1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Log6[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
+    : (T[VV])
 
 }
-@free trait Hardmax extends Operator {
+trait Xor extends Operator {
+
+  def Xor1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : (T[VV])
 
-  def Hardmax1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None)
-    : FS[(T[VV])]
 
+  def Xor7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : (T[VV])
+
 }
-@free trait Reciprocal extends Operator {
+trait Ceil extends Operator {
 
-  def Reciprocal1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Ceil1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def Reciprocal6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
+  def Ceil6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
 }
-@free trait Affine extends Operator {
+trait Sub extends Operator {
 
-  def Affine1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Sub1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
-}
-@free trait Pad extends Operator {
 
-  def Pad1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,mode : Option[(Tensor[VV])] = None,paddings : (Seq[String]),value : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Sub6[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : (T[VV])
 
 
-  def Pad2[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,mode : Option[(Tensor[VV])] = None,pads : (Seq[String]),value : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Sub7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : (T[VV])
 
 }
-@free trait Tile extends Operator {
+trait Relu extends Operator {
 
-  def Tile1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String, tiles: T[VV], tilesname: String, axis: T[VV], axisname: String)
-    : FS[(T[VV])]
+  def Relu1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def Tile6[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String, repeats: T[VV], repeatsname: String)
-    : FS[(T[VV])]
+  def Relu6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
 }
-@free trait RandomUniformLike extends Operator {
+trait Div extends Operator {
 
-  def RandomUniformLike1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,dtype : Option[(String)] = None,high : Option[(Int)] = None,low : Option[(Int)] = None,seed : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Div1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
-}
-@free trait Transpose extends Operator {
 
-  def Transpose1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,perm : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Div6[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : (T[VV])
 
-}
-@free trait Asin extends Operator {
 
-  def Asin7[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
+  def Div7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : (T[VV])
 
 }
-@free trait ReduceL1 extends Operator {
+trait ThresholdedRelu extends Operator {
 
-  def ReduceL11[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
-    : FS[(T[VV])]
+  def ThresholdedRelu1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait Mean extends Operator {
-
-  def Mean1[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
-
+trait LogSoftmax extends Operator {
 
-  def Mean6[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
+  def LogSoftmax1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait Sub extends Operator {
+trait BatchNormalization extends Operator {
 
-  def Sub1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def BatchNormalization1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, scale: T[VV], scalename: String, B: T[VV], Bname: String, mean: T[VV], meanname: String, someVar: T[VV], varname: String,consumed_inputs : (Seq[String]),epsilon : Option[(Int)] = None,is_test : Option[(String)] = None,momentum : Option[(Int)] = None,spatial : Option[(String)] = None)
+    : (T[VV], T[VV], T[VV], T[VV], T[VV])
 
 
-  def Sub6[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
+  def BatchNormalization6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, scale: T[VV], scalename: String, B: T[VV], Bname: String, mean: T[VV], meanname: String, someVar: T[VV], varname: String,epsilon : Option[(Int)] = None,is_test : Option[(String)] = None,momentum : Option[(Int)] = None,spatial : Option[(String)] = None)
+    : (T[VV], T[VV], T[VV], T[VV], T[VV])
 
 
-  def Sub7[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def BatchNormalization7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, scale: T[VV], scalename: String, B: T[VV], Bname: String, mean: T[VV], meanname: String, someVar: T[VV], varname: String,epsilon : Option[(Int)] = None,momentum : Option[(Int)] = None,spatial : Option[(String)] = None)
+    : (T[VV], T[VV], T[VV], T[VV], T[VV])
 
 }
-@free trait GRU extends Operator {
+trait AveragePool extends Operator {
 
-  def GRU1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,output_sequence : Option[(String)] = None)
-    : FS[(T[VV], T[VV])]
+  def AveragePool1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,auto_pad : Option[(Tensor[VV])] = None,kernel_shape : (Seq[String]),pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def GRU3[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,linear_before_reset : Option[(String)] = None,output_sequence : Option[(String)] = None)
-    : FS[(T[VV], T[VV])]
+  def AveragePool7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,auto_pad : Option[(Tensor[VV])] = None,count_include_pad : Option[(String)] = None,kernel_shape : (Seq[String]),pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
+    : (T[VV])
 
-
-  def GRU7[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,linear_before_reset : Option[(String)] = None)
-    : FS[(T[VV], T[VV])]
-
 }
-@free trait Sigmoid extends Operator {
+trait ReduceProd extends Operator {
 
-  def Sigmoid1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def ReduceProd1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
+    : (T[VV])
 
+}
+trait Crop extends Operator {
 
-  def Sigmoid6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
+  def Crop1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,border : Option[(Seq[String])] = None,scaleAttr : Option[(Seq[String])] = None)
+    : (T[VV])
 
 }
-@free trait LRN extends Operator {
+trait Mean extends Operator {
 
-  def LRN1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None,bias : Option[(Int)] = None,size : (String))
-    : FS[(T[VV])]
+  def Mean1[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
 
-}
-@free trait Multinomial extends Operator {
 
-  def Multinomial7[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,dtype : Option[(String)] = None,sample_size : Option[(String)] = None,seed : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Mean6[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
 
 }
-@free trait Split extends Operator {
+trait Split extends Operator {
 
-  def Split1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,split: Option[T[VV]] = None,axis : Option[(String)] = None,splitAttr : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Split1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,split: Option[T[VV]] = None,axis : Option[(String)] = None,splitAttr : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def Split2[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None,splitAttr : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Split2[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None,splitAttr : Option[(Seq[String])] = None)
+    : (T[VV])
 
 }
-@free trait Shape extends Operator {
+trait ArgMax extends Operator {
 
-  def Shape1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String)
-    : FS[(T[VV])]
+  def ArgMax1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axis : Option[(String)] = None,keepdims : Option[(String)] = None)
+    : (Tensor[Long])
 
 }
-@free trait Unsqueeze extends Operator {
+trait GlobalAveragePool extends Operator {
 
-  def Unsqueeze1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : (Seq[String]))
-    : FS[(T[VV])]
+  def GlobalAveragePool1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
 }
-@free trait Tan extends Operator {
+trait Sum extends Operator {
 
-  def Tan7[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
+  def Sum1[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
 
+
+  def Sum6[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
+
 }
-@free trait Exp extends Operator {
+trait LSTM extends Operator {
 
-  def Exp1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def LSTM1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None, initial_c: Option[T[VV]] = None, P: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,input_forget : Option[(String)] = None,output_sequence : Option[(String)] = None)
+    : (T[VV], T[VV], T[VV])
 
 
-  def Exp6[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
+  def LSTM7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None, initial_c: Option[T[VV]] = None, P: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,input_forget : Option[(String)] = None)
+    : (T[VV], T[VV], T[VV])
 
 }
-@free trait Xor extends Operator {
+trait Constant extends Operator {
 
-  def Xor1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Constant1[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
 
+}
+trait RandomUniformLike extends Operator {
 
-  def Xor7[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def RandomUniformLike1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,dtype : Option[(String)] = None,high : Option[(Int)] = None,low : Option[(Int)] = None,seed : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait Div extends Operator {
+trait Slice extends Operator {
 
-  def Div1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Slice1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,ends : (Seq[String]),starts : (Seq[String]))
+    : (T[VV])
 
+}
+trait Asin extends Operator {
 
-  def Div6[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Asin7[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
+    : (T[VV])
 
+}
+trait MatMul extends Operator {
 
-  def Div7[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def MatMul1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : (T[VV])
 
 }
-@free trait MeanVarianceNormalization extends Operator {
+trait Not extends Operator {
 
-  def MeanVarianceNormalization1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,across_channels : Option[(String)] = None,normalize_variance : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Not1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
 }
-@free trait Greater extends Operator {
+trait And extends Operator {
 
-  def Greater1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
+  def And1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : (T[VV])
 
 
-  def Greater7[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def And7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : (T[VV])
 
 }
-@free trait ReduceSumSquare extends Operator {
+trait Sin extends Operator {
 
-  def ReduceSumSquare1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Sin7[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
+    : (T[VV])
 
 }
-@free trait Less extends Operator {
+trait ImageScaler extends Operator {
 
-  def Less1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
+  def ImageScaler1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,bias : Option[(Seq[Int])] = None,scaleAttr : Option[(Int)] = None)
+    : (T[VV])
 
+}
+trait Mul extends Operator {
 
-  def Less7[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def Mul1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
-}
-@free trait Elu extends Operator {
 
-  def Elu1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Mul6[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : (T[VV])
 
 
-  def Elu6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Mul7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : (T[VV])
 
 }
-@free trait Flatten extends Operator {
+trait Scale extends Operator {
 
-  def Flatten1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None)
-    : FS[(T[VV])]
+  def Scale1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,scaleAttr : Option[(Int)] = None)
+    : (T[VV])
 
 }
-@free trait LpNormalization extends Operator {
+trait ReduceLogSum extends Operator {
 
-  def LpNormalization1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None,p : Option[(String)] = None)
-    : FS[(T[VV])]
+  def ReduceLogSum1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait LpPool extends Operator {
+trait Atan extends Operator {
 
-  def LpPool1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,auto_pad : Option[(Tensor[VV])] = None,kernel_shape : Option[(Seq[String])] = None,p : Option[(Int)] = None,pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Atan7[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
+    : (T[VV])
 
+}
+trait Concat extends Operator {
 
-  def LpPool2[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,auto_pad : Option[(Tensor[VV])] = None,kernel_shape : (Seq[String]),p : Option[(String)] = None,pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Concat1[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
 
-}
-@free trait GlobalMaxPool extends Operator {
 
-  def GlobalMaxPool1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
+  def Concat4[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
 
 }
-@free trait ReduceMax extends Operator {
+trait ReduceMin extends Operator {
 
-  def ReduceMax1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
-    : FS[(T[VV])]
+  def ReduceMin1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
+    : (T[VV])
 
 }
-@free trait ScaledTanh extends Operator {
+trait Conv extends Operator {
 
-  def ScaledTanh1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Conv1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String,B: Option[T[VV]] = None,auto_pad : Option[(Tensor[VV])] = None,dilations : Option[(Seq[String])] = None,group : Option[(String)] = None,kernel_shape : Option[(Seq[String])] = None,pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
+    : (T[VV])
 
 }
-@free trait Conv extends Operator {
+trait SpaceToDepth extends Operator {
 
-  def Conv1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String,B: Option[T[VV]] = None,auto_pad : Option[(Tensor[VV])] = None,dilations : Option[(Seq[String])] = None,group : Option[(String)] = None,kernel_shape : Option[(Seq[String])] = None,pads : Option[(Seq[String])] = None,strides : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def SpaceToDepth1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,blocksize : (String))
+    : (T[VV])
 
 }
-@free trait Mul extends Operator {
+trait PRelu extends Operator {
 
-  def Mul1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def PRelu1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, slope: T[VV], slopename: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def Mul6[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
+  def PRelu6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, slope: T[VV], slopename: String)
+    : (T[VV])
 
 
-  def Mul7[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def PRelu7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, slope: T[VV], slopename: String)
+    : (T[VV])
 
 }
-@free trait Upsample extends Operator {
+trait RNN extends Operator {
 
-  def Upsample1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,height_scaleAttr : (Int),mode : Option[(Tensor[VV])] = None,width_scaleAttr : (Int))
-    : FS[(T[VV])]
+  def RNN1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,output_sequence : Option[(String)] = None)
+    : (T[VV], T[VV])
 
 
-  def Upsample7[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,mode : Option[(Tensor[VV])] = None,scaleAttrs : (Seq[Int]))
-    : FS[(T[VV])]
+  def RNN7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None)
+    : (T[VV], T[VV])
 
 }
-@free trait Log extends Operator {
+trait Flatten extends Operator {
 
-  def Log1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Flatten1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None)
+    : (T[VV])
 
+}
+trait Floor extends Operator {
 
-  def Log6[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
+  def Floor1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
-}
-@free trait ImageScaler extends Operator {
 
-  def ImageScaler1[VV : spire.math.Numeric:ClassTag](name: String,input: T[VV], inputname: String,bias : Option[(Seq[Int])] = None,scaleAttr : Option[(Int)] = None)
-    : FS[(T[VV])]
+  def Floor6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
 }
-@free trait Dropout extends Operator {
+trait Hardmax extends Operator {
 
-  def Dropout1[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,consumed_inputs : Option[(Seq[String])] = None,is_test : Option[(String)] = None,ratio : Option[(Int)] = None)
-    : FS[(T[VV], T[VV])]
+  def Hardmax1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None)
+    : (T[VV])
 
+}
+trait Cast extends Operator {
 
-  def Dropout6[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,is_test : Option[(String)] = None,ratio : Option[(Int)] = None)
-    : FS[(T[VV], T[VV])]
+  def Cast1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,to : (Tensor[VV]))
+    : (T[VV])
 
 
-  def Dropout7[VV : spire.math.Numeric:ClassTag](name: String,data: T[VV], dataname: String,ratio : Option[(Int)] = None)
-    : FS[(T[VV], T[VV])]
+  def Cast6[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,to : (String))
+    : (T[VV])
 
 }
-@free trait Sum extends Operator {
+trait Cos extends Operator {
 
-  def Sum1[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
+  def Cos7[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
+    : (T[VV])
 
-
-  def Sum6[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
-
 }
-@free trait Not extends Operator {
+trait Less extends Operator {
 
-  def Not1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
+  def Less1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : (T[VV])
 
-}
-@free trait RandomNormal extends Operator {
 
-  def RandomNormal1[VV : spire.math.Numeric:ClassTag](name: String)
-    : FS[(T[VV])]
+  def Less7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : (T[VV])
 
 }
-@free trait Neg extends Operator {
+trait Sigmoid extends Operator {
 
-  def Neg1[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
-    : FS[(T[VV])]
+  def Sigmoid1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
+    : (T[VV])
 
 
-  def Neg6[VV : spire.math.Numeric:ClassTag](name: String,X: T[VV], Xname: String)
-    : FS[(T[VV])]
+  def Sigmoid6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : (T[VV])
 
 }
-@free trait And extends Operator {
+trait RandomNormal extends Operator {
 
-  def And1[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
+  def RandomNormal1[VV : Numeric:ClassTag](name: String)
+    : (T[VV])
 
+}
+trait Acos extends Operator {
 
-  def And7[VV : spire.math.Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def Acos7[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
+    : (T[VV])
 
 }}

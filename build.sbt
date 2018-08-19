@@ -30,5 +30,7 @@ addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.
 //    scalafixSettings,
     wartremoverErrors ++= Warts.allBut(Wart.PublicInference),
     wartremoverExcluded += baseDirectory.value / "src" / "main" / "scala" / "Float16.scala",
-    wartremoverExcluded += baseDirectory.value / "src" / "main" / "scala" / "ONNXAlgebra.scala"
+    //TODO: exclude only complaint for default arguments
+    wartremoverExcluded += baseDirectory.value / "src" / "main" / "scala" / "ONNXAlgebra.scala",
+    wartremoverExcluded += baseDirectory.value / "src" / "main" / "scala" / "ONNXAlgebraFS.scala"
 )

@@ -24,12 +24,14 @@ import java.nio.file.Paths
 
 object ONNXAlgebraGenerator extends App {
 
+  val useFS = true
+
   @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   implicit final class AnyOps[A](self: A) {
     def ===(other: A): Boolean = self == other
   }
 
-  val path = Paths.get("src/main/scala/ONNXAlgebra.scala");
+  val path = Paths.get("src/main/scala/ONNXAlgebra" + (if(useFS) "FS" else "") + ".scala");
 
   val attrMap = Array("Float",
                       "Int",
@@ -148,7 +150,8 @@ object ONNXAlgebraGenerator extends App {
 
     val maxSinceVersion = (x._2.map(z => z._2) foldLeft 0)(Math.max)
 
-        val beginString = "@free trait " + x._1 + " extends Operator" + " {\n"
+        val beginString = (if(useFS) "@free " else "") + "trait " + x._1 + 
+          (if(useFS) "FS" else "") + " extends Operator" + (if(useFS) " with " + x._1 else "") + " {\n"
 
       //  val opts = optionalInputs.map(g => g.map(h => h.GetTypeStr.getString))
       //  if(x._1 === "Add") println(opts)
@@ -160,7 +163,7 @@ object ONNXAlgebraGenerator extends App {
       "\n  def " + x._1 +
 //      (if(x._2(z)._2 < maxSinceVersion) x._2(z)._2.toString else "") +
       x._2(z)._2.toString +
-      "[VV : spire.math.Numeric:ClassTag](" + 
+      "[VV : Numeric:ClassTag](" + 
       "name: String" +
       (if (requiredInputs(z).size > 0 || optionalInputs(z).size > 0) "," else "") +
       requiredInputs(z)
@@ -182,14 +185,15 @@ object ONNXAlgebraGenerator extends App {
       (if (attributesStrings(z).size > 0 && (requiredInputs(z).size + optionalInputs(z).size) > 0)
          "," + attributesStrings(z)
        else "") +
-      ")\n" + "    : FS[(" + (0 until x._2(z)._4.size.toInt)
+      ")\n" + "    : " + //TODO: invoke def on parent trait
+      (if(useFS) "FS[" else "") + "(" + (0 until x._2(z)._4.size.toInt)
       .map(y => x._2(z)._4.get(y))
       .map(y =>
         "" + y.GetTypeStr.getString.replaceAll("T2", "T")
            .replaceAll("B", "T").replaceAll("V", "T").replaceAll("I", "T")
            .replaceAll("T1", "T").replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)",
                                                        "Tensor[Long]"))
-      .mkString(", ") + ")]\n"
+      .mkString(", ") + ")" + (if(useFS) "]" else "") +"\n"
       }.distinct.mkString("\n") 
       val endString = "\n}"
 
@@ -213,26 +217,34 @@ object ONNXAlgebraGenerator extends App {
     .mkString("\n")
 
   val fullSource = "package org.emergentorder\n\n" +
-    "import freestyle.free._\n" +
-    "import freestyle.free.implicits._\n" +
+    (if(useFS) "import freestyle.free._\n" else "") +
+    (if(useFS) "import freestyle.free.implicits._\n" else "") +
 //    "import spire.math.Number\n" +
     "import spire.math.UByte\n" +
     "import spire.math.UShort\n" +
     "import spire.math.UInt\n" +
     "import spire.math.ULong\n" +
-    "import spire.math._\n" +
-    "import spire.implicits._\n" +
-    "import scala.reflect.ClassTag\n" +
-    "import scala.language.higherKinds\n\n" +
-    "package object onnx {\n" +
-    "  type Tensor[U] = Tuple2[Vector[U], Seq[Int]]\n" +
-    "  trait Operator\n" +
-    typeStrings + "\n" +
+    "import spire.math.Numeric\n" +
+//    "import spire.implicits._\n" +
+    "import scala.reflect.ClassTag\n\n" +
+//    "import scala.language.higherKinds\n\n" +
+    "package" + (if(useFS) "" else " object") + " onnx " +
+    "{\n" +
+    (if(useFS) "" else "  type Tensor[U] = Tuple2[Vector[U], Seq[Int]]\n") +
+    (if(useFS) "" else "  trait Operator\n") +
+    (if(useFS) "" else typeStrings) + "\n" +
 //    "}\n" +
-    "@free trait DataSource {\n" +
-    "  def inputData[VV:spire.math.Numeric:ClassTag]: FS[Tensor[VV]]\n" +
-    "  def getParams[VV:spire.math.Numeric:ClassTag](name: String): FS[Tensor[VV]]\n" +
-    "  def getAttributes[VV:spire.math.Numeric:ClassTag](name: String): FS[Tensor[VV]]\n" +
+    (if(useFS) "@free " else "")  +
+    "trait DataSource" + (if(useFS) "FS extends DataSource" else "") + " {\n" +
+    "  def inputData[VV:Numeric:ClassTag]: " +
+    (if(useFS) "FS[" else "") +
+    "Tensor[VV]" + (if(useFS) "]" else "") +"\n" +
+    "  def getParams[VV:Numeric:ClassTag](name: String): " +
+    (if(useFS) "FS[" else "") +
+    "Tensor[VV]" + (if(useFS) "]" else "") +"\n" +
+    "  def getAttributes[VV:Numeric:ClassTag](name: String): " +
+    (if(useFS) "FS[" else "") +
+    "Tensor[VV]" + (if(useFS) "]" else "") +"\n" +
     "}\n" +
     traitStrings +
     "}\n"
