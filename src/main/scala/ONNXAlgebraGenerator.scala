@@ -22,6 +22,7 @@ import scala.meta._
 import java.nio.file.Files
 import java.nio.file.Paths
 
+//TODO: Enforce type constraints in addition to Numeric (Union types?) / Don't assume T1 et al = Tensor
 object ONNXAlgebraGenerator extends App {
 
   val useFS = true
@@ -79,24 +80,33 @@ object ONNXAlgebraGenerator extends App {
                     val a = s.stripPrefix("tensor(").dropRight(1)
                       (typeConstraintParam.type_param_str.getString + "Tensor" + a.capitalize -> (typeConstraintParam.type_param_str.getString, "  type " + typeConstraintParam.type_param_str.getString + "Tensor" + a.capitalize + " = Tensor[" + a.capitalize.replaceAll("Int32", "Int")
             .replaceAll("Int64", "Long")
+            .replaceAll("int64", "Long")
             .replaceAll("Int16", "Short")
             .replaceAll("Int8", "Byte")
             .replaceAll("Uint64", "ULong")
             .replaceAll("Uint32", "UInt")
             .replaceAll("Uint16", "UShort")
             .replaceAll("Uint8", "UByte")
+            .replaceAll("string", "String")
+            .replaceAll("float", "Float")
+            .replaceAll("double", "Double")
             .replaceAll("Bool", "Boolean") + "]" + "\n"))
                   }
 
         case s => {
-            (typeConstraintParam.type_param_str.getString + s.capitalize -> (typeConstraintParam.type_param_str.getString, "  type " + typeConstraintParam.type_param_str.getString + s.capitalize + " =" + s.capitalize.replaceAll("Int32", "Int")
+            (typeConstraintParam.type_param_str.getString + s.capitalize -> (typeConstraintParam.type_param_str.getString , "  type " + typeConstraintParam.type_param_str.getString + s.replaceAll("\\(", "").replaceAll("\\)", "").replaceAll(" ", "").replaceAll(",", "").capitalize + " =" + s.capitalize.replaceAll("\\(", "[").replaceAll("\\)", "]").replaceAll("map", "Map")
+            .replaceAll("Int32", "Int")
             .replaceAll("Int64", "Long")
+            .replaceAll("int64", "Long")
             .replaceAll("Int16", "Short")
             .replaceAll("Int8", "Byte")
             .replaceAll("Uint64", "ULong")
             .replaceAll("Uint32", "UInt")
             .replaceAll("Uint16", "UShort")
             .replaceAll("Uint8", "UByte")
+            .replaceAll("string", "String")
+            .replaceAll("float", "Float")
+            .replaceAll("double", "Double")
             .replaceAll("Bool", "Boolean") + "\n"))
                 }
                 }
@@ -170,8 +180,11 @@ object ONNXAlgebraGenerator extends App {
         .map(y =>
           y.GetName.getString
             .replaceAll("var", "someVar") + ": " + "" + y.GetTypeStr.getString
-            .replaceAll("B", "T").replaceAll("V", "T").replaceAll("I", "T")
-            .replaceAll("T1", "T").replaceAll("Tind", "T").replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)", "Tensor[Long]") + ", " + y.GetName.getString + "name: String"
+            .replaceAll("V", "V[VV]").replaceAll("B", "B[VV]").replaceAll("I", "I[VV]")
+            .replaceAll("T1", "t1[VV]")
+            .replaceAll("Tind", "tind[VV]")
+            .replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)", "Tensor[Long]")
+            .replaceAll("tensor\\(float\\)", "Tensor[Float]") + ", " + y.GetName.getString + "name: String"
             )
         .mkString(", ") +
       (if (requiredInputs(z).size > 0 && optionalInputs(z).size > 0) "," else "") +
@@ -180,7 +193,10 @@ object ONNXAlgebraGenerator extends App {
           y.GetName.getString
             .replaceAll("var", "someVar")
             .replaceAll("shape", "shapeInput") + ": " + "Option[" + y.GetTypeStr.getString
-            .replaceAll("T1", "T").replaceAll("Tind", "T").replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)", "Tensor[Long]") + "] = None")
+            .replaceAll("T1", "t1[VV]")
+            .replaceAll("Tind", "tind[VV]")
+            .replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)", "Tensor[Long]")
+            .replaceAll("tensor\\(float\\)", "Tensor[Float]") + "] = None")
         .mkString(", ") +
       (if (attributesStrings(z).size > 0 && (requiredInputs(z).size + optionalInputs(z).size) > 0)
          "," + attributesStrings(z)
@@ -189,10 +205,13 @@ object ONNXAlgebraGenerator extends App {
       (if(useFS) "FS[" else "") + "(" + (0 until x._2(z)._4.size.toInt)
       .map(y => x._2(z)._4.get(y))
       .map(y =>
-        "" + y.GetTypeStr.getString.replaceAll("T2", "T")
-           .replaceAll("B", "T").replaceAll("V", "T").replaceAll("I", "T")
-           .replaceAll("T1", "T").replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)",
-                                                       "Tensor[Long]"))
+        "" + y.GetTypeStr.getString
+          .replaceAll("V", "V[VV]").replaceAll("B", "B[VV]").replaceAll("I", "I[VV]")
+          .replaceAll("T2", "t2[VV]")
+          .replaceAll("T1", "t1[VV]")
+          .replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)",
+                                                       "Tensor[Long]").replaceAll("tensor\\(float\\)",
+                                                       "Tensor[Float]"))
       .mkString(", ") + ")" + (if(useFS) "]" else "") +"\n"
       }.distinct.mkString("\n") 
       val endString = "\n}"
@@ -207,7 +226,7 @@ object ONNXAlgebraGenerator extends App {
   val typeStrings = flattenedTypeStringsMap.values
     .map(z => z._2)
     .mkString("\n") + flattenedTypeStringsMap.values
-    .map(z => "  type " + z._1 + "[VV] = Tensor[VV]")
+    .map(z => "  type " + z._1.replaceAll("T1", "t1").replaceAll("T2", "t2").replaceAll("Tind", "tind") + "[VV] = Tensor[VV]")
     .toList
     .distinct
     .mkString("\n")

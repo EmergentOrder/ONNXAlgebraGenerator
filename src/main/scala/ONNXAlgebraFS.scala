@@ -22,6 +22,16 @@ package onnx {
     : FS[(T[VV])]
 
 }
+@free trait TileFS extends Operator with Tile {
+
+  def Tile1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String, tiles: T[VV], tilesname: String, axis: T[VV], axisname: String)
+    : FS[(T[VV])]
+
+
+  def Tile6[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String, repeats: t1[VV], repeatsname: String)
+    : FS[(T[VV])]
+
+}
 @free trait ExpFS extends Operator with Exp {
 
   def Exp1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,consumed_inputs : Option[(Seq[String])] = None)
@@ -54,6 +64,20 @@ package onnx {
     : FS[(T[VV])]
 
 }
+@free trait GRUFS extends Operator with GRU {
+
+  def GRU1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[t1[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,output_sequence : Option[(String)] = None)
+    : FS[(T[VV], T[VV])]
+
+
+  def GRU3[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[t1[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,linear_before_reset : Option[(String)] = None,output_sequence : Option[(String)] = None)
+    : FS[(T[VV], T[VV])]
+
+
+  def GRU7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[t1[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,linear_before_reset : Option[(String)] = None)
+    : FS[(T[VV], T[VV])]
+
+}
 @free trait TransposeFS extends Operator with Transpose {
 
   def Transpose1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,perm : Option[(Seq[String])] = None)
@@ -82,10 +106,30 @@ package onnx {
     : FS[(T[VV])]
 
 }
+@free trait XorFS extends Operator with Xor {
+
+  def Xor1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : FS[(t1[VV])]
+
+
+  def Xor7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : FS[(t1[VV])]
+
+}
 @free trait ArgMinFS extends Operator with ArgMin {
 
   def ArgMin1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axis : Option[(String)] = None,keepdims : Option[(String)] = None)
     : FS[(Tensor[Long])]
+
+}
+@free trait AndFS extends Operator with And {
+
+  def And1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : FS[(t1[VV])]
+
+
+  def And7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : FS[(t1[VV])]
 
 }
 @free trait LpNormalizationFS extends Operator with LpNormalization {
@@ -132,6 +176,12 @@ package onnx {
     : FS[(T[VV])]
 
 }
+@free trait ImputerFS extends Operator with Imputer {
+
+  def Imputer1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,imputed_value_floats : Option[(Seq[Int])] = None,imputed_value_int64s : Option[(Seq[String])] = None,replaced_value_float : Option[(Int)] = None,replaced_value_int64 : Option[(String)] = None)
+    : FS[(T[VV])]
+
+}
 @free trait SoftmaxFS extends Operator with Softmax {
 
   def Softmax1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,axis : Option[(String)] = None)
@@ -148,6 +198,12 @@ package onnx {
 
   def Crop1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,border : Option[(Seq[String])] = None,scaleAttr : Option[(Seq[String])] = None)
     : FS[(T[VV])]
+
+}
+@free trait NormalizerFS extends Operator with Normalizer {
+
+  def Normalizer1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,norm : Option[(Tensor[VV])] = None)
+    : FS[(Tensor[Float])]
 
 }
 @free trait MeanFS extends Operator with Mean {
@@ -176,18 +232,6 @@ package onnx {
     : FS[(T[VV])]
 
 }
-@free trait LoopIndexTensorFS extends Operator with LoopIndexTensor {
-
-  def LoopIndexTensor1[VV : Numeric:ClassTag](name: String,T: T[VV], Tname: String, loop_idx: T[VV], loop_idxname: String,axis : Option[(String)] = None)
-    : FS[(T[VV])]
-
-}
-@free trait RandomUniformLikeFS extends Operator with RandomUniformLike {
-
-  def RandomUniformLike1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,dtype : Option[(String)] = None,high : Option[(Int)] = None,low : Option[(Int)] = None,seed : Option[(Int)] = None)
-    : FS[(T[VV])]
-
-}
 @free trait PReluFS extends Operator with PRelu {
 
   def PRelu1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, slope: T[VV], slopename: String,consumed_inputs : Option[(Seq[String])] = None)
@@ -202,10 +246,26 @@ package onnx {
     : FS[(T[VV])]
 
 }
-@free trait IfFS extends Operator with If {
+@free trait TreeEnsembleClassifierFS extends Operator with TreeEnsembleClassifier {
 
-  def If1[VV : Numeric:ClassTag](name: String,cond: T[VV], condname: String,else_branch : (Seq[Float]),then_branch : (Seq[Float]))
-    : FS[(T[VV])]
+  def TreeEnsembleClassifier1[VV : Numeric:ClassTag](name: String,X: t1[VV], Xname: String,base_values : Option[(Seq[Int])] = None,class_ids : Option[(Seq[String])] = None,class_nodeids : Option[(Seq[String])] = None,class_treeids : Option[(Seq[String])] = None,class_weights : Option[(Seq[Int])] = None,classlabels_int64s : Option[(Seq[String])] = None,classlabels_strings : Option[(Seq[Tensor[VV]])] = None,nodes_falsenodeids : Option[(Seq[String])] = None,nodes_featureids : Option[(Seq[String])] = None,nodes_hitrates : Option[(Seq[Int])] = None,nodes_missing_value_tracks_true : Option[(Seq[String])] = None,nodes_modes : Option[(Seq[Tensor[VV]])] = None,nodes_nodeids : Option[(Seq[String])] = None,nodes_treeids : Option[(Seq[String])] = None,nodes_truenodeids : Option[(Seq[String])] = None,nodes_values : Option[(Seq[Int])] = None,post_transform : Option[(Tensor[VV])] = None)
+    : FS[(t2[VV], Tensor[Float])]
+
+}
+@free trait SVMClassifierFS extends Operator with SVMClassifier {
+
+  def SVMClassifier1[VV : Numeric:ClassTag](name: String,X: t1[VV], Xname: String,classlabels_ints : Option[(Seq[String])] = None,classlabels_strings : Option[(Seq[Tensor[VV]])] = None,coefficients : Option[(Seq[Int])] = None,kernel_params : Option[(Seq[Int])] = None,kernel_type : Option[(Tensor[VV])] = None,post_transform : Option[(Tensor[VV])] = None,prob_a : Option[(Seq[Int])] = None,prob_b : Option[(Seq[Int])] = None,rho : Option[(Seq[Int])] = None,support_vectors : Option[(Seq[Int])] = None,vectors_per_class : Option[(Seq[String])] = None)
+    : FS[(t2[VV], Tensor[Float])]
+
+}
+@free trait OrFS extends Operator with Or {
+
+  def Or1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : FS[(t1[VV])]
+
+
+  def Or7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : FS[(t1[VV])]
 
 }
 @free trait ReduceMinFS extends Operator with ReduceMin {
@@ -217,12 +277,6 @@ package onnx {
 @free trait SoftsignFS extends Operator with Softsign {
 
   def Softsign1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
-    : FS[(T[VV])]
-
-}
-@free trait ConstantFillFS extends Operator with ConstantFill {
-
-  def ConstantFill1[VV : Numeric:ClassTag](name: String,input: Option[T[VV]] = None,dtype : Option[(String)] = None,extra_shape : Option[(Seq[String])] = None,input_as_shape : Option[(String)] = None,shape : Option[(Seq[String])] = None,value : Option[(Int)] = None)
     : FS[(T[VV])]
 
 }
@@ -242,10 +296,22 @@ package onnx {
     : FS[(T[VV])]
 
 }
+@free trait GatherFS extends Operator with Gather {
+
+  def Gather1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String, indices: tind[VV], indicesname: String,axis : Option[(String)] = None)
+    : FS[(T[VV])]
+
+}
 @free trait SinFS extends Operator with Sin {
 
   def Sin7[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String)
     : FS[(T[VV])]
+
+}
+@free trait LoopFS extends Operator with Loop {
+
+  def Loop1[VV : Numeric:ClassTag](name: String,M: I[VV], Mname: String, cond: B[VV], condname: String,body : (Seq[Float]))
+    : FS[(V[VV])]
 
 }
 @free trait ReluFS extends Operator with Relu {
@@ -274,20 +340,20 @@ package onnx {
     : FS[(T[VV])]
 
 }
-@free trait AndFS extends Operator with And {
+@free trait TreeEnsembleRegressorFS extends Operator with TreeEnsembleRegressor {
 
-  def And1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
-
-
-  def And7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
+  def TreeEnsembleRegressor1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,aggregate_function : Option[(Tensor[VV])] = None,base_values : Option[(Seq[Int])] = None,n_targets : Option[(String)] = None,nodes_falsenodeids : Option[(Seq[String])] = None,nodes_featureids : Option[(Seq[String])] = None,nodes_hitrates : Option[(Seq[Int])] = None,nodes_missing_value_tracks_true : Option[(Seq[String])] = None,nodes_modes : Option[(Seq[Tensor[VV]])] = None,nodes_nodeids : Option[(Seq[String])] = None,nodes_treeids : Option[(Seq[String])] = None,nodes_truenodeids : Option[(Seq[String])] = None,nodes_values : Option[(Seq[Int])] = None,post_transform : Option[(Tensor[VV])] = None,target_ids : Option[(Seq[String])] = None,target_nodeids : Option[(Seq[String])] = None,target_treeids : Option[(Seq[String])] = None,target_weights : Option[(Seq[Int])] = None)
+    : FS[(Tensor[Float])]
 
 }
-@free trait SizeFS extends Operator with Size {
+@free trait GreaterFS extends Operator with Greater {
 
-  def Size1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String)
-    : FS[(T[VV])]
+  def Greater1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : FS[(t1[VV])]
+
+
+  def Greater7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : FS[(t1[VV])]
 
 }
 @free trait FlattenFS extends Operator with Flatten {
@@ -296,13 +362,9 @@ package onnx {
     : FS[(T[VV])]
 
 }
-@free trait EqualFS extends Operator with Equal {
+@free trait BinarizerFS extends Operator with Binarizer {
 
-  def Equal1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
-
-
-  def Equal7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+  def Binarizer1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,threshold : Option[(Int)] = None)
     : FS[(T[VV])]
 
 }
@@ -320,12 +382,6 @@ package onnx {
     : FS[(T[VV], T[VV])]
 
 }
-@free trait RandomNormalLikeFS extends Operator with RandomNormalLike {
-
-  def RandomNormalLike1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,dtype : Option[(String)] = None,mean : Option[(Int)] = None,scaleAttr : Option[(Int)] = None,seed : Option[(Int)] = None)
-    : FS[(T[VV])]
-
-}
 @free trait ScaledTanhFS extends Operator with ScaledTanh {
 
   def ScaledTanh1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None)
@@ -336,6 +392,12 @@ package onnx {
 
   def ParametricSoftplus1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None)
     : FS[(T[VV])]
+
+}
+@free trait CategoryMapperFS extends Operator with CategoryMapper {
+
+  def CategoryMapper1[VV : Numeric:ClassTag](name: String,X: t1[VV], Xname: String,cats_int64s : Option[(Seq[String])] = None,cats_strings : Option[(Seq[Tensor[VV]])] = None,default_int64 : Option[(String)] = None,default_string : Option[(Tensor[VV])] = None)
+    : FS[(t2[VV])]
 
 }
 @free trait MaxFS extends Operator with Max {
@@ -364,6 +426,12 @@ package onnx {
     : FS[(T[VV])]
 
 }
+@free trait FeatureVectorizerFS extends Operator with FeatureVectorizer {
+
+  def FeatureVectorizer1[VV : Numeric:ClassTag](name: String)
+    : FS[(Tensor[Float])]
+
+}
 @free trait GRUUnitFS extends Operator with GRUUnit {
 
   def GRUUnit1[VV : Numeric:ClassTag](name: String,hidden_prev: T[VV], hidden_prevname: String, gates: T[VV], gatesname: String, seq_lengths: T[VV], seq_lengthsname: String, t: T[VV], tname: String,drop_states : Option[(String)] = None)
@@ -386,20 +454,16 @@ package onnx {
     : FS[(T[VV])]
 
 }
-@free trait OrFS extends Operator with Or {
-
-  def Or1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
-
-
-  def Or7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
-
-}
 @free trait ThresholdedReluFS extends Operator with ThresholdedRelu {
 
   def ThresholdedRelu1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None)
     : FS[(T[VV])]
+
+}
+@free trait TopKFS extends Operator with TopK {
+
+  def TopK1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,axis : Option[(String)] = None,k : (String))
+    : FS[(T[VV], I[VV])]
 
 }
 @free trait AtanFS extends Operator with Atan {
@@ -422,20 +486,6 @@ package onnx {
 
   def LRN1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,alpha : Option[(Int)] = None,beta : Option[(Int)] = None,bias : Option[(Int)] = None,size : (String))
     : FS[(T[VV])]
-
-}
-@free trait GRUFS extends Operator with GRU {
-
-  def GRU1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,output_sequence : Option[(String)] = None)
-    : FS[(T[VV], T[VV])]
-
-
-  def GRU3[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,linear_before_reset : Option[(String)] = None,output_sequence : Option[(String)] = None)
-    : FS[(T[VV], T[VV])]
-
-
-  def GRU7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,linear_before_reset : Option[(String)] = None)
-    : FS[(T[VV], T[VV])]
 
 }
 @free trait LeakyReluFS extends Operator with LeakyRelu {
@@ -540,16 +590,6 @@ package onnx {
     : FS[(T[VV])]
 
 }
-@free trait TileFS extends Operator with Tile {
-
-  def Tile1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String, tiles: T[VV], tilesname: String, axis: T[VV], axisname: String)
-    : FS[(T[VV])]
-
-
-  def Tile6[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String, repeats: T[VV], repeatsname: String)
-    : FS[(T[VV])]
-
-}
 @free trait TanhFS extends Operator with Tanh {
 
   def Tanh1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,consumed_inputs : Option[(Seq[String])] = None)
@@ -560,10 +600,64 @@ package onnx {
     : FS[(T[VV])]
 
 }
-@free trait GatherFS extends Operator with Gather {
+@free trait RandomUniformLikeFS extends Operator with RandomUniformLike {
 
-  def Gather1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String, indices: T[VV], indicesname: String,axis : Option[(String)] = None)
+  def RandomUniformLike1[VV : Numeric:ClassTag](name: String,input: t1[VV], inputname: String,dtype : Option[(String)] = None,high : Option[(Int)] = None,low : Option[(Int)] = None,seed : Option[(Int)] = None)
+    : FS[(t2[VV])]
+
+}
+@free trait MultinomialFS extends Operator with Multinomial {
+
+  def Multinomial7[VV : Numeric:ClassTag](name: String,input: t1[VV], inputname: String,dtype : Option[(String)] = None,sample_size : Option[(String)] = None,seed : Option[(Int)] = None)
+    : FS[(t2[VV])]
+
+}
+@free trait LoopIndexTensorFS extends Operator with LoopIndexTensor {
+
+  def LoopIndexTensor1[VV : Numeric:ClassTag](name: String,T: T[VV], Tname: String, loop_idx: I[VV], loop_idxname: String,axis : Option[(String)] = None)
     : FS[(T[VV])]
+
+}
+@free trait LabelEncoderFS extends Operator with LabelEncoder {
+
+  def LabelEncoder1[VV : Numeric:ClassTag](name: String,X: t1[VV], Xname: String,classes_strings : Option[(Seq[Tensor[VV]])] = None,default_int64 : Option[(String)] = None,default_string : Option[(Tensor[VV])] = None)
+    : FS[(t2[VV])]
+
+}
+@free trait EqualFS extends Operator with Equal {
+
+  def Equal1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : FS[(t1[VV])]
+
+
+  def Equal7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : FS[(t1[VV])]
+
+}
+@free trait RNNFS extends Operator with RNN {
+
+  def RNN1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[t1[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,output_sequence : Option[(String)] = None)
+    : FS[(T[VV], T[VV])]
+
+
+  def RNN7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[t1[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None)
+    : FS[(T[VV], T[VV])]
+
+}
+@free trait RandomNormalLikeFS extends Operator with RandomNormalLike {
+
+  def RandomNormalLike1[VV : Numeric:ClassTag](name: String,input: t1[VV], inputname: String,dtype : Option[(String)] = None,mean : Option[(Int)] = None,scaleAttr : Option[(Int)] = None,seed : Option[(Int)] = None)
+    : FS[(t2[VV])]
+
+}
+@free trait LSTMFS extends Operator with LSTM {
+
+  def LSTM1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[t1[VV]] = None, initial_h: Option[T[VV]] = None, initial_c: Option[T[VV]] = None, P: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,input_forget : Option[(String)] = None,output_sequence : Option[(String)] = None)
+    : FS[(T[VV], T[VV], T[VV])]
+
+
+  def LSTM7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[t1[VV]] = None, initial_h: Option[T[VV]] = None, initial_c: Option[T[VV]] = None, P: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,input_forget : Option[(String)] = None)
+    : FS[(T[VV], T[VV], T[VV])]
 
 }
 @free trait AveragePoolFS extends Operator with AveragePool {
@@ -576,6 +670,12 @@ package onnx {
     : FS[(T[VV])]
 
 }
+@free trait SVMRegressorFS extends Operator with SVMRegressor {
+
+  def SVMRegressor1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,coefficients : Option[(Seq[Int])] = None,kernel_params : Option[(Seq[Int])] = None,kernel_type : Option[(Tensor[VV])] = None,n_supports : Option[(String)] = None,one_class : Option[(String)] = None,post_transform : Option[(Tensor[VV])] = None,rho : Option[(Seq[Int])] = None,support_vectors : Option[(Seq[Int])] = None)
+    : FS[(Tensor[Float])]
+
+}
 @free trait ReciprocalFS extends Operator with Reciprocal {
 
   def Reciprocal1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
@@ -583,6 +683,12 @@ package onnx {
 
 
   def Reciprocal6[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String)
+    : FS[(T[VV])]
+
+}
+@free trait ZipMapFS extends Operator with ZipMap {
+
+  def ZipMap1[VV : Numeric:ClassTag](name: String,X: Tensor[Float], Xname: String,classlabels_int64s : Option[(Seq[String])] = None,classlabels_strings : Option[(Seq[Tensor[VV]])] = None)
     : FS[(T[VV])]
 
 }
@@ -614,14 +720,10 @@ package onnx {
     : FS[(T[VV])]
 
 }
-@free trait CastFS extends Operator with Cast {
+@free trait DictVectorizerFS extends Operator with DictVectorizer {
 
-  def Cast1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,to : (Tensor[VV]))
-    : FS[(T[VV])]
-
-
-  def Cast6[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,to : (String))
-    : FS[(T[VV])]
+  def DictVectorizer1[VV : Numeric:ClassTag](name: String,X: t1[VV], Xname: String,int64_vocabulary : Option[(Seq[String])] = None,string_vocabulary : Option[(Seq[Tensor[VV]])] = None)
+    : FS[(t2[VV])]
 
 }
 @free trait DepthToSpaceFS extends Operator with DepthToSpace {
@@ -666,6 +768,18 @@ package onnx {
     : FS[(T[VV])]
 
 }
+@free trait ShapeFS extends Operator with Shape {
+
+  def Shape1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String)
+    : FS[(t1[VV])]
+
+}
+@free trait ScalerFS extends Operator with Scaler {
+
+  def Scaler1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,offset : Option[(Seq[Int])] = None,scaleAttr : Option[(Seq[Int])] = None)
+    : FS[(Tensor[Float])]
+
+}
 @free trait ReduceSumSquareFS extends Operator with ReduceSumSquare {
 
   def ReduceSumSquare1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String,axes : Option[(Seq[String])] = None,keepdims : Option[(String)] = None)
@@ -683,16 +797,6 @@ package onnx {
 
 
   def Div7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
-
-}
-@free trait GreaterFS extends Operator with Greater {
-
-  def Greater1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
-
-
-  def Greater7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
     : FS[(T[VV])]
 
 }
@@ -736,6 +840,12 @@ package onnx {
     : FS[(T[VV], T[VV], T[VV], T[VV], T[VV])]
 
 }
+@free trait LinearClassifierFS extends Operator with LinearClassifier {
+
+  def LinearClassifier1[VV : Numeric:ClassTag](name: String,X: t1[VV], Xname: String,classlabels_ints : Option[(Seq[String])] = None,classlabels_strings : Option[(Seq[Tensor[VV]])] = None,coefficients : (Seq[Int]),intercepts : Option[(Seq[Int])] = None,multi_class : Option[(String)] = None,post_transform : Option[(Tensor[VV])] = None)
+    : FS[(t2[VV], Tensor[Float])]
+
+}
 @free trait FloorFS extends Operator with Floor {
 
   def Floor1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,consumed_inputs : Option[(Seq[String])] = None)
@@ -756,16 +866,6 @@ package onnx {
 
   def MeanVarianceNormalization1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,across_channels : Option[(String)] = None,normalize_variance : Option[(String)] = None)
     : FS[(T[VV])]
-
-}
-@free trait LSTMFS extends Operator with LSTM {
-
-  def LSTM1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None, initial_c: Option[T[VV]] = None, P: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,input_forget : Option[(String)] = None,output_sequence : Option[(String)] = None)
-    : FS[(T[VV], T[VV], T[VV])]
-
-
-  def LSTM7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None, initial_c: Option[T[VV]] = None, P: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,input_forget : Option[(String)] = None)
-    : FS[(T[VV], T[VV], T[VV])]
 
 }
 @free trait LogFS extends Operator with Log {
@@ -796,12 +896,6 @@ package onnx {
     : FS[(T[VV])]
 
 }
-@free trait ShapeFS extends Operator with Shape {
-
-  def Shape1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String)
-    : FS[(T[VV])]
-
-}
 @free trait MulFS extends Operator with Mul {
 
   def Mul1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None,consumed_inputs : Option[(Seq[String])] = None)
@@ -814,6 +908,12 @@ package onnx {
 
   def Mul7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
     : FS[(T[VV])]
+
+}
+@free trait ConstantFillFS extends Operator with ConstantFill {
+
+  def ConstantFill1[VV : Numeric:ClassTag](name: String,input: Option[t1[VV]] = None,dtype : Option[(String)] = None,extra_shape : Option[(Seq[String])] = None,input_as_shape : Option[(String)] = None,shape : Option[(Seq[String])] = None,value : Option[(Int)] = None)
+    : FS[(t2[VV])]
 
 }
 @free trait AffineFS extends Operator with Affine {
@@ -836,6 +936,12 @@ package onnx {
     : FS[(T[VV])]
 
 }
+@free trait OneHotEncoderFS extends Operator with OneHotEncoder {
+
+  def OneHotEncoder1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,cats_int64s : Option[(Seq[String])] = None,cats_strings : Option[(Seq[Tensor[VV]])] = None,zeros : Option[(String)] = None)
+    : FS[(Tensor[Float])]
+
+}
 @free trait ImageScalerFS extends Operator with ImageScaler {
 
   def ImageScaler1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,bias : Option[(Seq[Int])] = None,scaleAttr : Option[(Int)] = None)
@@ -848,32 +954,48 @@ package onnx {
     : FS[(T[VV])]
 
 }
+@free trait ArrayFeatureExtractorFS extends Operator with ArrayFeatureExtractor {
+
+  def ArrayFeatureExtractor1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, Y: Tensor[Long], Yname: String)
+    : FS[(T[VV])]
+
+}
+@free trait LessFS extends Operator with Less {
+
+  def Less1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
+    : FS[(t1[VV])]
+
+
+  def Less7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
+    : FS[(t1[VV])]
+
+}
+@free trait CastMapFS extends Operator with CastMap {
+
+  def CastMap1[VV : Numeric:ClassTag](name: String,X: t1[VV], Xname: String,cast_to : Option[(Tensor[VV])] = None,map_form : Option[(Tensor[VV])] = None,max_map : Option[(String)] = None)
+    : FS[(t2[VV])]
+
+}
+@free trait SizeFS extends Operator with Size {
+
+  def Size1[VV : Numeric:ClassTag](name: String,data: T[VV], dataname: String)
+    : FS[(t1[VV])]
+
+}
 @free trait RandomNormalFS extends Operator with RandomNormal {
 
   def RandomNormal1[VV : Numeric:ClassTag](name: String)
     : FS[(T[VV])]
 
 }
-@free trait LoopFS extends Operator with Loop {
+@free trait CastFS extends Operator with Cast {
 
-  def Loop1[VV : Numeric:ClassTag](name: String,M: T[VV], Mname: String, cond: T[VV], condname: String,body : (Seq[Float]))
-    : FS[(T[VV])]
-
-}
-@free trait MultinomialFS extends Operator with Multinomial {
-
-  def Multinomial7[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,dtype : Option[(String)] = None,sample_size : Option[(String)] = None,seed : Option[(Int)] = None)
-    : FS[(T[VV])]
-
-}
-@free trait RNNFS extends Operator with RNN {
-
-  def RNN1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None,output_sequence : Option[(String)] = None)
-    : FS[(T[VV], T[VV])]
+  def Cast1[VV : Numeric:ClassTag](name: String,input: t1[VV], inputname: String,to : (Tensor[VV]))
+    : FS[(t2[VV])]
 
 
-  def RNN7[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String, W: T[VV], Wname: String, R: T[VV], Rname: String,B: Option[T[VV]] = None, sequence_lens: Option[T[VV]] = None, initial_h: Option[T[VV]] = None,activation_alpha : Option[(Seq[Int])] = None,activation_beta : Option[(Seq[Int])] = None,activations : Option[(Seq[Tensor[VV]])] = None,clip : Option[(Int)] = None,direction : Option[(Tensor[VV])] = None,hidden_size : Option[(String)] = None)
-    : FS[(T[VV], T[VV])]
+  def Cast6[VV : Numeric:ClassTag](name: String,input: t1[VV], inputname: String,to : (String))
+    : FS[(t2[VV])]
 
 }
 @free trait SumFS extends Operator with Sum {
@@ -886,6 +1008,18 @@ package onnx {
     : FS[(T[VV])]
 
 }
+@free trait IfFS extends Operator with If {
+
+  def If1[VV : Numeric:ClassTag](name: String,cond: B[VV], condname: String,else_branch : (Seq[Float]),then_branch : (Seq[Float]))
+    : FS[(V[VV])]
+
+}
+@free trait LinearRegressorFS extends Operator with LinearRegressor {
+
+  def LinearRegressor1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,coefficients : Option[(Seq[Int])] = None,intercepts : Option[(Seq[Int])] = None,post_transform : Option[(Tensor[VV])] = None,targets : Option[(String)] = None)
+    : FS[(Tensor[Float])]
+
+}
 @free trait SplitFS extends Operator with Split {
 
   def Split1[VV : Numeric:ClassTag](name: String,input: T[VV], inputname: String,split: Option[T[VV]] = None,axis : Option[(String)] = None,splitAttr : Option[(Seq[String])] = None)
@@ -896,16 +1030,6 @@ package onnx {
     : FS[(T[VV])]
 
 }
-@free trait LessFS extends Operator with Less {
-
-  def Less1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
-
-
-  def Less7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
-    : FS[(T[VV])]
-
-}
 @free trait GlobalLpPoolFS extends Operator with GlobalLpPool {
 
   def GlobalLpPool1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,p : Option[(Int)] = None)
@@ -913,22 +1037,6 @@ package onnx {
 
 
   def GlobalLpPool2[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,p : Option[(String)] = None)
-    : FS[(T[VV])]
-
-}
-@free trait TopKFS extends Operator with TopK {
-
-  def TopK1[VV : Numeric:ClassTag](name: String,X: T[VV], Xname: String,axis : Option[(String)] = None,k : (String))
-    : FS[(T[VV], T[VV])]
-
-}
-@free trait XorFS extends Operator with Xor {
-
-  def Xor1[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String,axis : Option[(String)] = None,broadcast : Option[(String)] = None)
-    : FS[(T[VV])]
-
-
-  def Xor7[VV : Numeric:ClassTag](name: String,A: T[VV], Aname: String, B: T[VV], Bname: String)
     : FS[(T[VV])]
 
 }}
