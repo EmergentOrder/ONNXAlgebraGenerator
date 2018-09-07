@@ -22,7 +22,6 @@ import scala.meta._
 import java.nio.file.Files
 import java.nio.file.Paths
 
-//TODO: Enforce type constraints in addition to Numeric (Union types?) / Don't assume T1 et al = Tensor
 object ONNXAlgebraGenerator extends App {
 
   val useFS = true
@@ -64,7 +63,7 @@ object ONNXAlgebraGenerator extends App {
 //  tuples.foreach( y => println(y._2))
 
   val traitStringsAndTypeStrings = tuples.map { x =>
-    val typeStringMap = x._2.map{b =>
+    val typeStringMap: Map[String, IndexedSeq[String]] = x._2.map{b =>
       val typeConstraintParams = b._5
       (0 until typeConstraintParams.size.toInt)
       .map { y =>
@@ -76,53 +75,72 @@ object ONNXAlgebraGenerator extends App {
                 .get(z)
                 .getString match
                 {
+                  //TODO: collapse cases
                   case s if s.startsWith("tensor(") =>  {
-                    val a = s.stripPrefix("tensor(").dropRight(1)
-                      (typeConstraintParam.type_param_str.getString + "Tensor" + a.capitalize -> (typeConstraintParam.type_param_str.getString, "  type " + typeConstraintParam.type_param_str.getString + "Tensor" + a.capitalize + " = Tensor[" + a.capitalize.replaceAll("Int32", "Int")
-            .replaceAll("Int64", "Long")
+                    val a = s
+                      (typeConstraintParam.type_param_str.getString, a.capitalize
+            .replaceAll("uint64", "ULong")
+            .replaceAll("uint32", "UInt")
+            .replaceAll("uint16", "UShort")
+            .replaceAll("uint8", "UByte")
             .replaceAll("int64", "Long")
-            .replaceAll("Int16", "Short")
-            .replaceAll("Int8", "Byte")
-            .replaceAll("Uint64", "ULong")
-            .replaceAll("Uint32", "UInt")
-            .replaceAll("Uint16", "UShort")
-            .replaceAll("Uint8", "UByte")
+            .replaceAll("Int64", "Long")
+            .replaceAll("int32", "Int")
+            .replaceAll("Int32", "Int")
+            .replaceAll("int16", "Short")
+            .replaceAll("int8", "Byte")
             .replaceAll("string", "String")
             .replaceAll("float", "Float")
             .replaceAll("double", "Double")
-            .replaceAll("Bool", "Boolean") + "]" + "\n"))
+            .replaceAll("Bool", "Boolean")
+            .replaceAll("bool", "Boolean")
+            .replaceAll("complex64", "Complex[Float]")
+            .replaceAll("complex128", "Complex[Double]")
+            )
                   }
 
         case s => {
-            (typeConstraintParam.type_param_str.getString + s.capitalize -> (typeConstraintParam.type_param_str.getString , "  type " + typeConstraintParam.type_param_str.getString + s.replaceAll("\\(", "").replaceAll("\\)", "").replaceAll(" ", "").replaceAll(",", "").capitalize + " =" + s.capitalize.replaceAll("\\(", "[").replaceAll("\\)", "]").replaceAll("map", "Map")
+            (typeConstraintParam.type_param_str.getString, s.capitalize.replaceAll("\\(", "[").replaceAll("\\)", "]").replaceAll("map", "Map")
+            .replaceAll("uint64", "ULong")
+            .replaceAll("uint32", "UInt")
+            .replaceAll("uint16", "UShort")
+            .replaceAll("uint8", "UByte")
+            .replaceAll("int32", "Int")
             .replaceAll("Int32", "Int")
-            .replaceAll("Int64", "Long")
             .replaceAll("int64", "Long")
-            .replaceAll("Int16", "Short")
-            .replaceAll("Int8", "Byte")
-            .replaceAll("Uint64", "ULong")
-            .replaceAll("Uint32", "UInt")
-            .replaceAll("Uint16", "UShort")
-            .replaceAll("Uint8", "UByte")
+            .replaceAll("Int64", "Long")
+            .replaceAll("int16", "Short")
+            .replaceAll("int8", "Byte")
             .replaceAll("string", "String")
             .replaceAll("float", "Float")
             .replaceAll("double", "Double")
-            .replaceAll("Bool", "Boolean") + "\n"))
+            .replaceAll("Bool", "Boolean")
+            .replaceAll("bool", "Boolean")
+            .replaceAll("complex64", "Complex[Float]")
+            .replaceAll("complex128", "Complex[Double]")
+            )
                 }
                 }
 
 
                 )
-
+        println(allowedTypeStrings)
         allowedTypeStrings
       }
-    }.flatten
+    }
       .flatten
-      .toMap
+      .distinct
+      .flatten
+      .groupBy(_._1)
+      .map{ case(key, value) => (key, value.map(_._2))}
+      //      .flatten
+        .toMap //+ ("tensor(int64)" -> IndexedSeq("Tensor[Long]")) + ("tensor(float)" -> IndexedSeq("Tensor[Float]"))
+
    
 //      typeStringMap
 //  }
 
+println(typeStringMap)
     //CAUTION: iterator, unsafe
 //    val attrIter = x._6.begin
     val attributesStrings: Seq[String] = x._2.map{z =>
@@ -138,7 +156,9 @@ object ONNXAlgebraGenerator extends App {
           .replaceAll("scale", "scaleAttr") + " : " + (if (required) ""
                                                        else
                                                          "Option[") + "(" + result._2
-          .replaceAll("Tensor", "Tensor[VV]") + ")" + (if (required)
+          .replaceAll("Tensor", "Tensor[_]") + 
+          ")" + 
+          (if (required)
                                                                      ""
                                                                    else
                                                                      "] = None")
@@ -157,6 +177,11 @@ object ONNXAlgebraGenerator extends App {
       .map(z => y._3.get(z))
       .filter(z => z.GetOption === 1)
     }
+  
+    val outputs = x._2.map{y =>
+      (0 until y._4.size.toInt)
+      .map(z => y._4.get(z))
+    }
 
     val maxSinceVersion = (x._2.map(z => z._2) foldLeft 0)(Math.max)
 
@@ -170,21 +195,38 @@ object ONNXAlgebraGenerator extends App {
    //       scala.math.max(requiredInputs.map(g => g.map(h => h.GetTypeStr.getString)).distinct.size,
      //       attributesStrings.distinct.size)).map{z =>
                              //                    optionalInputs.map(g => g.map(h => h.GetTypeStr.getString)).distinct.size)).map {z =>
-      "\n  def " + x._1 +
+      "\n  def " + x._1 + x._2(z)._2.toString +
 //      (if(x._2(z)._2 < maxSinceVersion) x._2(z)._2.toString else "") +
-      x._2(z)._2.toString +
-      "[VV : Numeric:ClassTag](" + 
+/*      x._2(z)._2.toString + (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "[" else "") +
+        (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
+        .map(y =>
+        y.GetTypeStr.getString + " : Numeric:ClassTag:" + "(" 
+                       + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]"))
+                          .mkString(" |: ")
+                       + ")"  //+ "#check"
+                       ) ++
+        optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
+          .map(y =>
+              y.GetTypeStr.getString + " : Numeric:ClassTag:" + "(" + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]"))
+                        .mkString(" |: ")  + ")" //+ "#check" 
+                        ) ++
+        outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
+        .map(y =>
+        y.GetTypeStr.getString + " : Numeric:ClassTag:" + "(" 
+                       + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]"))
+                          .mkString(" |: ")
+                       + ")"  //+ "#check"
+                       )).distinct.mkString(",") +
+      (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "]" else "") + */
+      "(" + 
       "name: String" +
       (if (requiredInputs(z).size > 0 || optionalInputs(z).size > 0) "," else "") +
       requiredInputs(z)
         .map(y =>
-          y.GetName.getString
-            .replaceAll("var", "someVar") + ": " + "" + y.GetTypeStr.getString
-            .replaceAll("V", "V[VV]").replaceAll("B", "B[VV]").replaceAll("I", "I[VV]")
-            .replaceAll("T1", "t1[VV]")
-            .replaceAll("Tind", "tind[VV]")
-            .replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)", "Tensor[Long]")
-            .replaceAll("tensor\\(float\\)", "Tensor[Float]") + ", " + y.GetName.getString + "name: String"
+            y.GetName.getString.replaceAll("var", "someVar") 
+                       + ": " + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString)) typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]")).mkString(" |: ")
+                         else y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]"))
+            + ", " + y.GetName.getString + "name: String"
             )
         .mkString(", ") +
       (if (requiredInputs(z).size > 0 && optionalInputs(z).size > 0) "," else "") +
@@ -192,26 +234,22 @@ object ONNXAlgebraGenerator extends App {
         .map(y =>
           y.GetName.getString
             .replaceAll("var", "someVar")
-            .replaceAll("shape", "shapeInput") + ": " + "Option[" + y.GetTypeStr.getString
-            .replaceAll("T1", "t1[VV]")
-            .replaceAll("Tind", "tind[VV]")
-            .replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)", "Tensor[Long]")
-            .replaceAll("tensor\\(float\\)", "Tensor[Float]") + "] = None")
+            .replaceAll("shape", "shapeInput") 
+            + ": " + "Option[" + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString)) typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]")).mkString(" |: ")
+                         else y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) +
+                         "] = None"
+            )
         .mkString(", ") +
       (if (attributesStrings(z).size > 0 && (requiredInputs(z).size + optionalInputs(z).size) > 0)
          "," + attributesStrings(z)
        else "") +
       ")\n" + "    : " + //TODO: invoke def on parent trait
-      (if(useFS) "FS[" else "") + "(" + (0 until x._2(z)._4.size.toInt)
-      .map(y => x._2(z)._4.get(y))
+      (if(useFS) "FS[" else "") + "(" + 
+      outputs(z)
       .map(y =>
-        "" + y.GetTypeStr.getString
-          .replaceAll("V", "V[VV]").replaceAll("B", "B[VV]").replaceAll("I", "I[VV]")
-          .replaceAll("T2", "t2[VV]")
-          .replaceAll("T1", "t1[VV]")
-          .replaceAll("T", "T[VV]").replaceAll("tensor\\(int64\\)",
-                                                       "Tensor[Long]").replaceAll("tensor\\(float\\)",
-                                                       "Tensor[Float]"))
+        "" + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString)) typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]")).mkString(" |: ")
+                         else y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) 
+ )
       .mkString(", ") + ")" + (if(useFS) "]" else "") +"\n"
       }.distinct.mkString("\n") 
       val endString = "\n}"
@@ -223,13 +261,15 @@ object ONNXAlgebraGenerator extends App {
 
   val flattenedTypeStringsMap =
     traitStringsAndTypeStrings.map(x => x._2).flatten.toMap
-  val typeStrings = flattenedTypeStringsMap.values
-    .map(z => z._2)
-    .mkString("\n") + flattenedTypeStringsMap.values
-    .map(z => "  type " + z._1.replaceAll("T1", "t1").replaceAll("T2", "t2").replaceAll("Tind", "tind") + "[VV] = Tensor[VV]")
-    .toList
-    .distinct
-    .mkString("\n")
+//  val typeStrings = flattenedTypeStringsMap.values
+//    .map(z => z._2)
+//    .mkString("\n") + flattenedTypeStringsMap.values
+//    .map(z => "  type " + z._1.replaceAll("T1", "t1").replaceAll("T2", "t2").replaceAll("Tind", "tind") + "[VV] = Tensor[VV]")
+//    .toList
+//    .distinct
+//    .mkString("\n")
+
+//  println(typeStrings)
   val traitStrings = traitStringsAndTypeStrings
     .map(x => x._1)
     .filter(x => !x.contains("ATen"))
@@ -243,25 +283,27 @@ object ONNXAlgebraGenerator extends App {
     "import spire.math.UShort\n" +
     "import spire.math.UInt\n" +
     "import spire.math.ULong\n" +
+    "import spire.math.Complex\n" +
     "import spire.math.Numeric\n" +
 //    "import spire.implicits._\n" +
     "import scala.reflect.ClassTag\n\n" +
 //    "import scala.language.higherKinds\n\n" +
     "package" + (if(useFS) "" else " object") + " onnx " +
     "{\n" +
+ (if(useFS) "" else "type |:[+A1, +A2] = Either[A1, A2]\n") +
     (if(useFS) "" else "  type Tensor[U] = Tuple2[Vector[U], Seq[Int]]\n") +
     (if(useFS) "" else "  trait Operator\n") +
-    (if(useFS) "" else typeStrings) + "\n" +
+//    (if(useFS) "" else typeStrings) + "\n" +
 //    "}\n" +
     (if(useFS) "@free " else "")  +
     "trait DataSource" + (if(useFS) "FS extends DataSource" else "") + " {\n" +
-    "  def inputData[VV:Numeric:ClassTag]: " +
+    "  def inputData[VV:Numeric:ClassTag" + "]: " +
     (if(useFS) "FS[" else "") +
     "Tensor[VV]" + (if(useFS) "]" else "") +"\n" +
-    "  def getParams[VV:Numeric:ClassTag](name: String): " +
+    "  def getParams[VV:Numeric:ClassTag" + "](name: String): " +
     (if(useFS) "FS[" else "") +
     "Tensor[VV]" + (if(useFS) "]" else "") +"\n" +
-    "  def getAttributes[VV:Numeric:ClassTag](name: String): " +
+    "  def getAttributes[VV:Numeric:ClassTag"  + "](name: String): " +
     (if(useFS) "FS[" else "") +
     "Tensor[VV]" + (if(useFS) "]" else "") +"\n" +
     "}\n" +
@@ -269,6 +311,7 @@ object ONNXAlgebraGenerator extends App {
     "}\n"
 
   def generate(): Unit = {
+    println(fullSource)
     val onnxSource = fullSource.parse[Source].get
     val wrote = Files.write(path, onnxSource.syntax.getBytes("UTF-8"));
   }
