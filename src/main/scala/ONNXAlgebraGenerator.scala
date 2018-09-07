@@ -24,7 +24,8 @@ import java.nio.file.Paths
 
 object ONNXAlgebraGenerator extends App {
 
-  val useFS = true
+  //TODO: Reintroduce Traditional ML ops
+  val useFS = false
 
   @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   implicit final class AnyOps[A](self: A) {
@@ -197,35 +198,41 @@ println(typeStringMap)
                              //                    optionalInputs.map(g => g.map(h => h.GetTypeStr.getString)).distinct.size)).map {z =>
       "\n  def " + x._1 + x._2(z)._2.toString +
 //      (if(x._2(z)._2 < maxSinceVersion) x._2(z)._2.toString else "") +
-/*      x._2(z)._2.toString + (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "[" else "") +
+      (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "[" else "") +
         (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
         .map(y =>
-        y.GetTypeStr.getString + " : Numeric:ClassTag:" + "(" 
-                       + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]"))
+        //TODO: Implement specialization via Spire where possible 
+        //"@sp(" +  
+        y.GetTypeStr.getString + " <: " + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]").stripPrefix("Tensor[").stripSuffix("]"))
                           .mkString(" |: ")
-                       + ")"  //+ "#check"
+                       //+ ") " 
+                       + " : Numeric:ClassTag"   
                        ) ++
         optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
           .map(y =>
-              y.GetTypeStr.getString + " : Numeric:ClassTag:" + "(" + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]"))
-                        .mkString(" |: ")  + ")" //+ "#check" 
+            //"@sp(" + 
+              y.GetTypeStr.getString + " <: " + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]").stripPrefix("Tensor[").stripSuffix("]"))
+                          .mkString(" |: ")
+                       //+ ") " 
+                       + " : Numeric:ClassTag"     
                         ) ++
         outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
         .map(y =>
-        y.GetTypeStr.getString + " : Numeric:ClassTag:" + "(" 
-                       + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]"))
+           //"@sp(" +  
+                 y.GetTypeStr.getString + " <: " + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]").stripPrefix("Tensor[").stripSuffix("]"))
                           .mkString(" |: ")
-                       + ")"  //+ "#check"
+                       //+ ") " 
+                       + " : Numeric:ClassTag"  
                        )).distinct.mkString(",") +
-      (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "]" else "") + */
+      (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "]" else "") +
       "(" + 
       "name: String" +
       (if (requiredInputs(z).size > 0 || optionalInputs(z).size > 0) "," else "") +
       requiredInputs(z)
         .map(y =>
             y.GetName.getString.replaceAll("var", "someVar") 
-                       + ": " + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString)) typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]")).mkString(" |: ")
-                         else y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]"))
+                       + ": " +
+                       (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).contains("Tensor[")) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]"))
             + ", " + y.GetName.getString + "name: String"
             )
         .mkString(", ") +
@@ -235,8 +242,8 @@ println(typeStringMap)
           y.GetName.getString
             .replaceAll("var", "someVar")
             .replaceAll("shape", "shapeInput") 
-            + ": " + "Option[" + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString)) typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]")).mkString(" |: ")
-                         else y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) +
+            + ": " + "Option[" +
+                       (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).contains("Tensor[")) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) + 
                          "] = None"
             )
         .mkString(", ") +
@@ -247,9 +254,8 @@ println(typeStringMap)
       (if(useFS) "FS[" else "") + "(" + 
       outputs(z)
       .map(y =>
-        "" + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString)) typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]")).mkString(" |: ")
-                         else y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) 
- )
+        "" + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).contains("Tensor[")) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) 
+      )
       .mkString(", ") + ")" + (if(useFS) "]" else "") +"\n"
       }.distinct.mkString("\n") 
       val endString = "\n}"
@@ -278,7 +284,7 @@ println(typeStringMap)
   val fullSource = "package org.emergentorder\n\n" +
     (if(useFS) "import freestyle.free._\n" else "") +
     (if(useFS) "import freestyle.free.implicits._\n" else "") +
-//    "import spire.math.Number\n" +
+    "import scala.{specialized => sp}\n" +
     "import spire.math.UByte\n" +
     "import spire.math.UShort\n" +
     "import spire.math.UInt\n" +
