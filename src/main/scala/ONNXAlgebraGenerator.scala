@@ -27,9 +27,9 @@ object ONNXAlgebraGenerator extends App {
   //TODO: Reintroduce Traditional ML ops
   val useFS = false
   val useDotty = false
-  val unionTypeOperator = (if(useDotty) " | " else " |: ")
+  val unionTypeOperator = (if(useDotty) " | " else " TypeOr ")
   //Missing: Non-numeric, Boolean and String
-  val inputTypes = "T <: Float16" + unionTypeOperator + "Float" + unionTypeOperator + "Double" + unionTypeOperator + "Byte" + unionTypeOperator + "Short" + unionTypeOperator + "Int" + unionTypeOperator + "Long" + unionTypeOperator + "UByte" + unionTypeOperator + "UShort" + unionTypeOperator + "UInt" + unionTypeOperator + "ULong" + unionTypeOperator + "Complex[Float]" + unionTypeOperator + "Complex[Double]" + ":Numeric:ClassTag:Field"
+  val inputTypes = "T " + (if(useDotty) "<: " else ": ") + (if(useDotty) "" else "(UNil TypeOr ") + "Float16" + unionTypeOperator + "Float" + unionTypeOperator + "Double" + unionTypeOperator + "Byte" + unionTypeOperator + "Short" + unionTypeOperator + "Int" + unionTypeOperator + "Long" + unionTypeOperator + "UByte" + unionTypeOperator + "UShort" + unionTypeOperator + "UInt" + unionTypeOperator + "ULong" + unionTypeOperator + "Complex[Float]" + unionTypeOperator + "Complex[Double]" + (if(useDotty) "" else ")#check") + ":Numeric:ClassTag:Field"
 
   @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   implicit final class AnyOps[A](self: A) {
@@ -209,26 +209,26 @@ println(typeStringMap)
         .map(y =>
         //TODO: Implement specialization via Spire where possible 
         //"@sp(" +  
-        y.GetTypeStr.getString + " <: " + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]").stripPrefix("Tensor[").stripSuffix("]"))
+        y.GetTypeStr.getString + (if(useDotty) " <: " else " : ") + (if(useDotty) "" else "(UNil TypeOr ") + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]").stripPrefix("Tensor[").stripSuffix("]"))
                           .mkString(unionTypeOperator)
                        //+ ") " 
-                       + " : Numeric:ClassTag:Field"   
+                       + (if(useDotty) "" else ")#check") + " : Numeric:ClassTag:Field"   
                        ) ++
         optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
           .map(y =>
             //"@sp(" + 
-              y.GetTypeStr.getString + " <: " + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]").stripPrefix("Tensor[").stripSuffix("]"))
+              y.GetTypeStr.getString + (if(useDotty) " <: " else " : ") + (if(useDotty) "" else "(UNil TypeOr ") + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]").stripPrefix("Tensor[").stripSuffix("]"))
                           .mkString(unionTypeOperator)
                        //+ ") " 
-                       + " : Numeric:ClassTag:Field"     
+                       + (if(useDotty) "" else ")#check") + " : Numeric:ClassTag:Field"     
                         ) ++
         outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
         .map(y =>
            //"@sp(" +  
-                 y.GetTypeStr.getString + " <: " + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]").stripPrefix("Tensor[").stripSuffix("]"))
+                 y.GetTypeStr.getString + (if(useDotty) " <: " else " : ") + (if(useDotty) "" else "(UNil TypeOr ") + typeStringMap(y.GetTypeStr.getString).map(_.replaceAll("\\(", "[").replaceAll("\\)", "]").stripPrefix("Tensor[").stripSuffix("]"))
                           .mkString(unionTypeOperator)
                        //+ ") " 
-                       + " : Numeric:ClassTag:Field"  
+                       + (if(useDotty) "" else ")#check") + " : Numeric:ClassTag:Field"  
                        )).distinct.mkString(",") +
       (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) ", J <: XInt]" else "") +
       "(" + 
@@ -312,10 +312,45 @@ println(typeStringMap)
     (if(useFS) "" else "type F[B] = IO[B]\n") +
     (if(useFS) "" else "type Par[F[_], A] = FreeApplicative[F, A]\n") +
     (if(useFS) "" else  "final type FS[A] = Par[F, A]\n" ) +
+//    (if(useFS) "" else "type FreeS[F[_], A] = Free[FreeApplicative[F, ?], A]\n") +
     (if(useFS) "" else "  trait Operator\n") +
     (if(useFS) "" else "trait Graph\n") + //TODO: something with Graph
 //    (if(useFS) "" else typeStrings) + "\n" +
 //    "}\n" +
+    (if(useFS || useDotty) "" else """object UnionType {
+
+      trait inv[-A] {}
+
+      sealed trait OrR {
+        type L <: OrR
+        type R
+        type invIntersect
+        type intersect
+      }
+
+      sealed class TypeOr[A <: OrR, B] extends OrR {
+        type L = A
+        type R = B
+
+        type intersect = (L#intersect with R)
+        type invIntersect = (L#invIntersect with inv[R])
+        type check[X] = invIntersect <:< inv[X]
+      }
+
+      object UNil extends OrR {
+        type intersect = Any
+        type invIntersect = inv[Nothing]
+      }
+      type UNil = UNil.type
+
+    }
+    """
+    ) +
+    (if(useDotty) "" else
+    """
+    import UnionType._
+    """
+    ) +
     (if(useFS) " " else "")  +
     "trait DataSource" + (if(useFS) "Free extends DataSource" else "") + " {\n" +
     "  def inputData" + (if(useFS) "Free" else "") + "[" + inputTypes + ", J <: XInt]: " +
