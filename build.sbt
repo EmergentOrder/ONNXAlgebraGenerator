@@ -20,7 +20,7 @@ addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.
   scalacOptions ++= Seq("-feature", "-unchecked", "-deprecation", "-Ywarn-unused-import", "-Ywarn-unused:locals,privates"),
     libraryDependencies ++= Seq( 
       "org.bytedeco" % "javacpp" % "1.4.3-SNAPSHOT",
-      "org.bytedeco.javacpp-presets" % "onnx-platform" % "1.2.2-1.4.3-SNAPSHOT",
+      "org.bytedeco.javacpp-presets" % "onnx-platform" % "1.3.0-1.4.3-SNAPSHOT",
 //      "org.scalatest" %% "scalatest" % "3.0.5-M1" % Test,
       "org.typelevel" % "spire_2.12" % "0.16.0",
       "org.typelevel" % "cats-core_2.12" % "1.3.1",
