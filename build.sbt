@@ -12,24 +12,26 @@ settings(
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   resolvers += Resolver.jcenterRepo,
   publishArtifact in packageDoc := false,
-//addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full),
+  addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.7" cross CrossVersion.binary),
+
+addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full),
 // scalacOptions += "-Xplugin-require:macroparadise",
 //  scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise")), // macroparadise plugin doesn't work in repl yet.
   scalacOptions ++= Seq("-feature", "-unchecked", "-deprecation", "-Ywarn-unused-import", "-Ywarn-unused:locals,privates"),
     libraryDependencies ++= Seq( 
       "org.bytedeco" % "javacpp" % "1.4.3-SNAPSHOT",
-//      "org.bytedeco.javacpp-presets" % "onnx-platform" % "1.2.2-1.4.3-SNAPSHOT",
+      "org.bytedeco.javacpp-presets" % "onnx-platform" % "1.2.2-1.4.3-SNAPSHOT",
 //      "org.scalatest" %% "scalatest" % "3.0.5-M1" % Test,
       "org.typelevel" % "spire_2.12" % "0.16.0",
       "org.typelevel" % "cats-core_2.12" % "1.3.1",
       "org.typelevel" % "cats-free_2.12" % "1.3.1",
       "org.typelevel" % "cats-effect_2.12" % "1.0.0",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
-      "org.scalameta" % "scalameta_2.12" % "4.0.0-M11",
+//      "org.scalameta" % "scalameta_2.12" % "4.0.0-M11",
       "eu.timepit" %% "singleton-ops" % "0.3.0",
       "ch.qos.logback" % "logback-classic" % "1.2.3",
 //      "com.github.pureconfig" %% "pureconfig" % "0.9.1",
-//      "io.frees" % "frees-core_2.12" % "0.8.2"
+      "io.frees" %% "frees-core" % "0.8.2"
        ),
 //    scalafixSettings,
     wartremoverErrors ++= Warts.allBut(Wart.PublicInference),
