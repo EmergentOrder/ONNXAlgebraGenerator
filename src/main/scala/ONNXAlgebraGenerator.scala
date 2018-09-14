@@ -25,14 +25,14 @@ import java.nio.file.Paths
 object ONNXAlgebraGenerator extends App {
 
   //TODO: Fix op ordering in target source file
-  val useFS = true
-  val useDotty = false
+  val useFS = false
+  val useDotty = true
   val unionTypeOperator = (if(useDotty) " | " else " TypeOr ")
   //Missing: Non-numeric, Boolean and String
   //TODO: The rest of the desugaring for the union type context bounds
-  val checkedTypes ="(implicit ev:" + (if(useDotty) "(" else "(UNil TypeOr ") + "Float16" + unionTypeOperator + "Float" + unionTypeOperator + "Double" + unionTypeOperator + "Byte" + unionTypeOperator + "Short" + unionTypeOperator + "Int" + unionTypeOperator + "Long" + unionTypeOperator + "UByte" + unionTypeOperator + "UShort" + unionTypeOperator + "UInt" + unionTypeOperator + "ULong" + unionTypeOperator + "Complex[Float]" + unionTypeOperator + "Complex[Double]" + (if(useDotty) ")" else ")#check[T])")
+  val checkedTypes ="(implicit ev:" + (if(useDotty) "(" else "(UNil TypeOr ") + "Float16" + unionTypeOperator + "Float" + unionTypeOperator + "Double" + unionTypeOperator + "Byte" + unionTypeOperator + "Short" + unionTypeOperator + "Int" + unionTypeOperator + "Long" + unionTypeOperator + "UByte" + unionTypeOperator + "UShort" + unionTypeOperator + "UInt" + unionTypeOperator + "ULong" + unionTypeOperator + "Complex[Float]" + unionTypeOperator + "Complex[Double]" + (if(useDotty) "))" else ")#check[T])")
 
-  val inputTypes = "T " + (if(useDotty) "<: " else ": ")  + "Numeric:ClassTag:Field"
+  val inputTypes = "T " + (if(useDotty) ": " else ": ")  + "Numeric:ClassTag:Field"
 
   @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   implicit final class AnyOps[A](self: A) {
@@ -210,7 +210,7 @@ println(typeStringMap)
               (if(replaceParens.contains("Tensor[")) replaceParens.stripPrefix("Tensor[").stripSuffix("]") else replaceParens)}
                             .mkString(unionTypeOperator)
                        //+ ") " 
-                         + (if(useDotty) ")" else ")#check") + "[" + y.GetTypeStr.getString + "]"
+                         + (if(useDotty) ")" else ")#check" + "[" + y.GetTypeStr.getString + "]" )
                          ))
 
            val optionalImplicitsInputs = (optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
@@ -221,7 +221,7 @@ println(typeStringMap)
               (if(replaceParens.contains("Tensor[")) replaceParens.stripPrefix("Tensor[").stripSuffix("]") else replaceParens)}
                             .mkString(unionTypeOperator)
                        //+ ") " 
-                         + (if(useDotty) ")" else ")#check") + "[" + y.GetTypeStr.getString + "]"
+                         + (if(useDotty) ")" else ")#check" + "[" + y.GetTypeStr.getString + "]" )
                         ))
 
 
@@ -233,7 +233,7 @@ println(typeStringMap)
               (if(replaceParens.contains("Tensor[")) replaceParens.stripPrefix("Tensor[").stripSuffix("]") else replaceParens)}
                             .mkString(unionTypeOperator)
                        //+ ") " 
-                         + (if(useDotty) ")" else ")#check") + "[" + y.GetTypeStr.getString + "]"
+                         + (if(useDotty) ")" else ")#check" + "[" + y.GetTypeStr.getString + "]" )
                         ))
 
 
@@ -245,17 +245,17 @@ println(typeStringMap)
         .map(y =>
         //TODO: HIGH PRIORITY: Implement specialization via Spire where possible 
         //"@sp(" +  
-        y.GetTypeStr.getString + (if(useDotty) " <: " else " : ") + "Numeric:ClassTag:Field"
+        y.GetTypeStr.getString + (if(useDotty) " : " else " : ") + "Numeric:ClassTag:Field"
         ) ++
         optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
           .map(y =>
             //"@sp(" + 
-              y.GetTypeStr.getString + (if(useDotty) " <: " else " : ") +  "Numeric:ClassTag:Field"
+              y.GetTypeStr.getString + (if(useDotty) " : " else " : ") +  "Numeric:ClassTag:Field"
                       ) ++
         outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
         .map(y =>
            //"@sp(" +  
-                 y.GetTypeStr.getString + (if(useDotty) " <: " else " : ") + "Numeric:ClassTag:Field"
+                 y.GetTypeStr.getString + (if(useDotty) " : " else " : ") + "Numeric:ClassTag:Field"
                       ) 
         ).distinct.mkString(",") +
       (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) ", J <: XInt]" else "[J <:XInt]") +
