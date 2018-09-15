@@ -24,12 +24,11 @@ import java.nio.file.Paths
 
 object ONNXAlgebraGenerator extends App {
 
-  //TODO: Fix op ordering in target source file
   val useFS = false
-  val useDotty = true
+  val useDotty = false
   val unionTypeOperator = (if(useDotty) " | " else " TypeOr ")
   //Missing: Non-numeric, Boolean and String
-  //TODO: The rest of the desugaring for the union type context bounds
+
   val checkedTypes ="(implicit ev:" + (if(useDotty) "(" else "(UNil TypeOr ") + "Float16" + unionTypeOperator + "Float" + unionTypeOperator + "Double" + unionTypeOperator + "Byte" + unionTypeOperator + "Short" + unionTypeOperator + "Int" + unionTypeOperator + "Long" + unionTypeOperator + "UByte" + unionTypeOperator + "UShort" + unionTypeOperator + "UInt" + unionTypeOperator + "ULong" + unionTypeOperator + "Complex[Float]" + unionTypeOperator + "Complex[Double]" + (if(useDotty) "))" else ")#check[T])")
 
   val inputTypes = "T " + (if(useDotty) ": " else ": ")  + "Numeric:ClassTag:Field"
@@ -286,7 +285,7 @@ println(typeStringMap)
        else "") +
       ")\n" +
       (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ implicitsOutputs).size > 0) "(implicit " else "") + (requiredImplicitsInputs ++ optionalImplicitsInputs ++ implicitsOutputs).distinct.mkString(",") +  (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ implicitsOutputs).size > 0) ")" else "") +
-      "    : " + //TODO: HIGH PRIORITY: invoke def on parent trait - without, cannot re-use backends
+      "    : " + 
       (if(useFS) "FS[" else "") + "(" + 
       outputs(z)
       .map(y =>
@@ -312,8 +311,10 @@ println(typeStringMap)
 //    .mkString("\n")
 
 //  println(typeStrings)
-  val traitStrings = traitStringsAndTypeStrings
+  val traitStrings: String = traitStringsAndTypeStrings
     .map(x => x._1)
+    .toSeq
+    .sorted
     .filter(x => !x.contains("ATen"))
     .mkString("\n")
 
@@ -339,8 +340,7 @@ println(typeStringMap)
 //    "import scala.language.higherKinds\n\n" +
     "package" + (if(useFS) " object" else " object") + " onnx" +  (if(useFS) "Free " else " ") +
     "{\n" +
- (if(useFS) "" else "type |:"  + "[+A1, +A2] = Either[A1, A2]\n") +
-    //TODO: Replace with Tensor class from ... Tensorics?
+ (if(useFS) "" else "type |:"  + "[+A1, +A2] = Either[A1, A2]\n") + 
     (if(useFS) "" else "  type Tensor[U, J <: XInt] = Tuple2[Seq[U], Seq[J]]\n") + 
     //TODO: HIGH PRIORITY: Defer effect choice - WIP
 //    (if(!useFS) "" else "type G[A] = IO[A]\n") +
