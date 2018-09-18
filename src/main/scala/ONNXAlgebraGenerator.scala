@@ -242,7 +242,6 @@ println(typeStringMap)
       (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "[" else "") +
         (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
         .map(y =>
-        //TODO: HIGH PRIORITY: Implement specialization via Spire where possible 
         "@sp " +  
         y.GetTypeStr.getString + (if(useDotty) " : " else " : ") + "Numeric:ClassTag:Field"
         ) ++
