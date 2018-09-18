@@ -243,17 +243,17 @@ println(typeStringMap)
         (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
         .map(y =>
         //TODO: HIGH PRIORITY: Implement specialization via Spire where possible 
-        //"@sp(" +  
+        "@sp " +  
         y.GetTypeStr.getString + (if(useDotty) " : " else " : ") + "Numeric:ClassTag:Field"
         ) ++
         optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
           .map(y =>
-            //"@sp(" + 
+            "@sp " + 
               y.GetTypeStr.getString + (if(useDotty) " : " else " : ") +  "Numeric:ClassTag:Field"
                       ) ++
         outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
         .map(y =>
-           //"@sp(" +  
+           "@sp " +  
                  y.GetTypeStr.getString + (if(useDotty) " : " else " : ") + "Numeric:ClassTag:Field"
                       ) 
         ).distinct.mkString(",") +
@@ -342,7 +342,6 @@ println(typeStringMap)
     "{\n" +
  (if(useFS) "" else "type |:"  + "[+A1, +A2] = Either[A1, A2]\n") + 
     (if(useFS) "" else "  type Tensor[U, J <: XInt] = Tuple2[Seq[U], Seq[J]]\n") + 
-    //TODO: HIGH PRIORITY: Defer effect choice - WIP
 //    (if(!useFS) "" else "type G[A] = IO[A]\n") +
 //    (if(!useFS) "" else "type Par[F[_], A] = FreeApplicative[F, A]\n") +
 //    (if(!useFS) "" else "final type FS[A] = Par[G, A]\n") + 
