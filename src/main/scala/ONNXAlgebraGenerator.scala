@@ -23,7 +23,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 object ONNXAlgebraGenerator extends App {
-//TODO: Enforce shape constraints
+//TODO: Enforce shape constraints - using dependent types via singleton and higher-kinded
+//TODO: Use numsca for Tensor[Doubles only!] ?  or tensorflow_scala[Generic, but not typed by shape] or MXNet or Compute.scala or none
 
   val useFS = false
   val useDotty = false
@@ -48,11 +49,11 @@ object ONNXAlgebraGenerator extends App {
                       "String",
                       "Tensor",
                       "Graph",
-                      "Seq[Float]",
-                      "Seq[Int]",
-                      "Seq[String]",
-                      "Seq[Tensor]",
-                      "Seq[Graph]").zipWithIndex.toMap
+                      "Array[Float]",
+                      "Array[Int]",
+                      "Array[String]",
+                      "Array[Tensor]",
+                      "Array[Graph]").zipWithIndex.toMap
   val attrTypeMap = for ((k, v) <- attrMap) yield (v, k)
 
   val loaded =
@@ -345,7 +346,7 @@ println(typeStringMap)
     "package" + (if(useFS) " object" else " object") + " onnx" +  (if(useFS) "Free " else " ") +
     "{\n" +
  (if(useFS) "" else "type |:"  + "[+A1, +A2] = Either[A1, A2]\n") + 
-    (if(useFS) "" else "  type Tensor[U, J <: XInt] = Tuple2[Seq[U], Seq[J]]\n") + //TODO: Remove assumption that all dimensions in shape are the same, due to literal types
+    (if(useFS) "" else "  type Tensor[U, J <: XInt] = Tuple2[Array[U], Array[J]]\n") + //TODO: Remove assumption that all dimensions in shape are the same, due to literal types
 //    (if(!useFS) "" else "type G[A] = IO[A]\n") +
 //    (if(!useFS) "" else "type Par[F[_], A] = FreeApplicative[F, A]\n") +
 //    (if(!useFS) "" else "final type FS[A] = Par[G, A]\n") + 
