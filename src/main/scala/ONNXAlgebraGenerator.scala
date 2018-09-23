@@ -26,8 +26,8 @@ object ONNXAlgebraGenerator extends App {
 //TODO: Enforce shape constraints - using dependent types via singleton and higher-kinded
 //TODO: Use numsca for Tensor[Doubles only!] ?  or tensorflow_scala[Generic, but not typed by shape] or MXNet or Compute.scala or none
 
-  val useFS = false
-  val useDotty = false
+  val useFS = true
+  val useDotty = true
   val unionTypeOperator = (if(useDotty) " | " else " TypeOr ")
   //Missing: Non-numeric, Boolean and String
 
@@ -346,7 +346,7 @@ println(typeStringMap)
     "package" + (if(useFS) " object" else " object") + " onnx" +  (if(useFS) "Free " else " ") +
     "{\n" +
  (if(useFS) "" else "type |:"  + "[+A1, +A2] = Either[A1, A2]\n") + 
-    (if(useFS) "" else "  type Tensor[U, J <: XInt] = Tuple2[Array[U], Array[J]]\n") + //TODO: Remove assumption that all dimensions in shape are the same, due to literal types
+    (if(useFS) "" else "  type Tensor[U, J <: XInt] = Tuple2[Array[U], Seq[J]]\n") + //TODO: Remove assumption that all dimensions in shape are the same, due to literal types
 //    (if(!useFS) "" else "type G[A] = IO[A]\n") +
 //    (if(!useFS) "" else "type Par[F[_], A] = FreeApplicative[F, A]\n") +
 //    (if(!useFS) "" else "final type FS[A] = Par[G, A]\n") + 
