@@ -346,7 +346,7 @@ println(typeStringMap)
     "package" + (if(useFS) " object" else " object") + " onnx" +  (if(useFS) "Free " else " ") +
     "{\n" +
  (if(useFS) "" else "type |:"  + "[+A1, +A2] = Either[A1, A2]\n") + 
-    (if(useFS) "" else "  type Tensor[U, J <: XInt] = Tuple2[Array[U], Seq[J]]\n") + //TODO: Remove assumption that all dimensions in shape are the same, due to literal types
+    (if(useFS) "" else "  type Tensor[U, J <: XInt] = Tuple2[Array[U], Array[J]]\n") + //TODO: Remove assumption that all dimensions in shape are the same, due to literal types
 //    (if(!useFS) "" else "type G[A] = IO[A]\n") +
 //    (if(!useFS) "" else "type Par[F[_], A] = FreeApplicative[F, A]\n") +
 //    (if(!useFS) "" else "final type FS[A] = Par[G, A]\n") + 
