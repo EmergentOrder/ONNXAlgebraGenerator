@@ -27,7 +27,7 @@ object ONNXAlgebraGenerator extends App {
 //TODO: Use numsca for Tensor[Doubles only] ?  or tensorflow_scala[Generic, but not typed by shape] 
 //or MXNet[ supprots Float16,Float32,Float64,Int32,UInt8, but most operators Float32 and 64 only] or Compute.scala[Float only, others on roadmap] or none
 
-  val useFS = true
+  val useFS = false
   val useDotty = false
   val unionTypeOperator = (if(useDotty) " | " else " TypeOr ")
   //Missing: Non-numeric, Boolean and String
@@ -380,10 +380,10 @@ println(typeStringMap)
 
   def generate(): Unit = {
     println(fullSource)
-    val onnxSource = fullSource.parse[Source].get
+//    val onnxSource = fullSource.parse[Source].get
 //
-val wrote = Files.write(path, onnxSource.syntax.getBytes("UTF-8"));
-// val wrote = Files.write(path, fullSource.getBytes("UTF-8"))
+//val wrote = Files.write(path, onnxSource.syntax.getBytes("UTF-8"));
+ val wrote = Files.write(path, fullSource.getBytes("UTF-8"))
   }
 
   generate()
