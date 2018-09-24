@@ -27,7 +27,7 @@ object ONNXAlgebraGenerator extends App {
 //TODO: Use numsca for Tensor[Doubles only] ?  or tensorflow_scala[Generic, but not typed by shape] 
 //or MXNet[ supprots Float16,Float32,Float64,Int32,UInt8, but most operators Float32 and 64 only] or Compute.scala[Float only, others on roadmap] or none
 
-  val useFS = false
+  val useFS = true
   val useDotty = false
   val unionTypeOperator = (if(useDotty) " | " else " TypeOr ")
   //Missing: Non-numeric, Boolean and String
@@ -245,7 +245,7 @@ println(typeStringMap)
          buildTypeStrings(optionalInputs(z), optionalImplicitsInputs) ++
          buildTypeStrings(outputs(z), implicitsOutputs)            
         ).distinct.mkString(",") +
-      (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) ", J <: XInt]" else "[J <:XInt]") +
+      (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "]" else "") +
       "(" + 
       "name: String" +
       (if (requiredInputs(z).size > 0 || optionalInputs(z).size > 0) "," else "") +
@@ -365,13 +365,13 @@ println(typeStringMap)
     ) +
     (if(useFS) "@free " else "")  +
     "trait DataSource" + (if(useFS) "Free extends DataSource" else "") + " {\n" +
-    "  def inputData" + (if(useFS) "Free" else "") + "[" + inputTypes + ", J <: XInt]" + (if(useDotty) "" else checkedTypes) + ": " +
+    "  def inputData" + (if(useFS) "Free" else "") + "[" + inputTypes + "]" + (if(useDotty) "" else checkedTypes) + ": " +
     (if(useFS) "FS[" else "") +
     "Tensor[T]" + (if(useFS) "]" else "") +"\n" +
-    "  def getParams" + (if(useFS) "Free" else "") + "[" + inputTypes  + ", J <: XInt](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
+    "  def getParams" + (if(useFS) "Free" else "") + "[" + inputTypes  + "](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
     (if(useFS) "FS[" else "") +
     "Tensor[T]" + (if(useFS) "]" else "") +"\n" +
-    "  def getAttributes" + (if(useFS) "Free" else "") + "[" + inputTypes + ", J <: XInt](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
+    "  def getAttributes" + (if(useFS) "Free" else "") + "[" + inputTypes + "](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
     (if(useFS) "FS[" else "") +
     "Tensor[T]" + (if(useFS) "]" else "") +"\n" +
     "}\n" +
