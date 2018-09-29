@@ -26,8 +26,8 @@ object ONNXAlgebraGenerator extends App {
 //TODO: Enforce shape constraints - using dependent types via singleton and higher-kinded
 //TODO: Use numsca for Tensor[Doubles only] ?  or tensorflow_scala[Generic, but not typed by shape] 
 //or MXNet[ supprots Float16,Float32,Float64,Int32,UInt8, but most operators Float32 and 64 only] or Compute.scala[Float only, others on roadmap] or none
-
-  val useFS = true
+// LATEST: Use Tensorics, create Scala wrapper
+  val useFS = false
   val useDotty = false
   val unionTypeOperator = (if(useDotty) " | " else " TypeOr ")
   //Missing: Non-numeric, Boolean and String
@@ -62,19 +62,18 @@ object ONNXAlgebraGenerator extends App {
             .replaceAll("complex128", "Complex[Double]")
 
 
-  //TODO: Fix fragility here, get it (indirectly) from the protobuf
-  val attrMap = Array("Undefined",
-                      "Float",
-                      "Int",
-                      "String",
-                      "Tensor",
-                      "Graph",
-                      "Array[Float]",
-                      "Array[Int]",
-                      "Array[String]",
-                      "Array[Tensor]",
-                      "Array[Graph]").zipWithIndex.toMap
-  val attrTypeMap = for ((k, v) <- attrMap) yield (v, k)
+  val attrTypeMap = Map(org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_UNDEFINED ->"Undefined",
+                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_FLOAT -> "Float",
+                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_INT -> "Int",
+                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_STRING -> "String",
+                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_TENSOR -> "Tensor",
+                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_GRAPH -> "Graph",
+                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_FLOATS -> "Array[Float]",
+                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_INTS -> "Array[Int]",
+                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_STRINGS -> "Array[String]",
+                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_TENSORS -> "Array[Tensor]",
+                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_GRAPHS -> "Array[Graph]")
+
 
   val loaded =
     org.bytedeco.javacpp.Loader.load(classOf[org.bytedeco.javacpp.onnx])
@@ -196,44 +195,24 @@ println(typeStringMap)
           (if(useFS) "Free" else "") + " extends Operator" + (if(useFS) " with " + x._1 else "") + " {\n"
 
 
+        def generateDefStringSig(s: org.bytedeco.javacpp.onnx.OpSchema.FormalParameter) = {
+           (if(useDotty) "(" else "ev" + s.GetTypeStr.getString + ":" + "(UNil TypeOr ") + typeStringMap(s.GetTypeStr.getString).map{ a =>
+              val replaceParens = a.replaceAll("\\(", "[").replaceAll("\\)", "]")
+              (if(replaceParens.contains("Tensor[")) replaceParens.stripPrefix("Tensor[").stripSuffix("]") else replaceParens)}
+                            .mkString(unionTypeOperator) +
+                              (if(useDotty) ")" else ")#check" + "[" + s.GetTypeStr.getString + "]" )
+        }
 
         val defStrings = (0 until 
           requiredInputs.size).map {z =>
            val requiredImplicitsInputs = (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
-           .map(y =>
-           //TODO: extract
-            (if(useDotty) "(" else "ev" + y.GetTypeStr.getString + ":" + "(UNil TypeOr ") + typeStringMap(y.GetTypeStr.getString).map{ a =>
-              val replaceParens = a.replaceAll("\\(", "[").replaceAll("\\)", "]")
-              (if(replaceParens.contains("Tensor[")) replaceParens.stripPrefix("Tensor[").stripSuffix("]") else replaceParens)}
-                            .mkString(unionTypeOperator)
-                       //+ ") " 
-                         + (if(useDotty) ")" else ")#check" + "[" + y.GetTypeStr.getString + "]" )
-                         ))
+           .map(y => generateDefStringSig(y)))
 
            val optionalImplicitsInputs = (optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
-           .map(y =>
-           //TODO: extract
-            (if(useDotty) "(" else "ev" + y.GetTypeStr.getString + ":" + "(UNil TypeOr ") + typeStringMap(y.GetTypeStr.getString).map{ a =>
-              val replaceParens = a.replaceAll("\\(", "[").replaceAll("\\)", "]")
-              (if(replaceParens.contains("Tensor[")) replaceParens.stripPrefix("Tensor[").stripSuffix("]") else replaceParens)}
-                            .mkString(unionTypeOperator)
-                       //+ ") " 
-                         + (if(useDotty) ")" else ")#check" + "[" + y.GetTypeStr.getString + "]" )
-                        ))
-
+           .map(y =>  generateDefStringSig(y)))
 
            val implicitsOutputs = (outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
-           .map(y =>
-           //TODO: extract
-            (if(useDotty) "(" else "ev" + y.GetTypeStr.getString + ":" + "(UNil TypeOr ") + typeStringMap(y.GetTypeStr.getString).map{ a =>
-              val replaceParens = a.replaceAll("\\(", "[").replaceAll("\\)", "]")
-              (if(replaceParens.contains("Tensor[")) replaceParens.stripPrefix("Tensor[").stripSuffix("]") else replaceParens)}
-                            .mkString(unionTypeOperator)
-                       //+ ") " 
-                         + (if(useDotty) ")" else ")#check" + "[" + y.GetTypeStr.getString + "]" )
-                        ))
-
-
+           .map(y =>  generateDefStringSig(y)))
 
        val allImplicits = (requiredImplicitsInputs ++ optionalImplicitsInputs ++ implicitsOutputs).distinct.mkString(",")
 
