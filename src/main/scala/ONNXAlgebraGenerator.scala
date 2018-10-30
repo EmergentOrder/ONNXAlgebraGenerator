@@ -255,9 +255,9 @@ println(typeStringMap)
           y.GetName.getString
             .replaceAll("var", "someVar")
 //            .replaceAll("shape", "shapeInput")
-            + ": " + "Option[" +
+            + ": " + (if(variadic) "Seq[" else "") + "Option[" +
                        (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) +
-                         "]" + (if(variadic) "*" else "") + (if(optional && !variadic) " = None" else "") // + (if(variadic) "" else ", " + y.GetName.getString + "name: Option[String]" + (if(optional) " = None" else "") )
+                         "]" + (if(variadic) "]" else "") + (if(optional && !variadic) " = None" else "") // + (if(variadic) "" else ", " + y.GetName.getString + "name: Option[String]" + (if(optional) " = None" else "") )
             )
         .map(y => if(optional) y.replaceAll("shape", "shapeInput") else y)
         .mkString(", ")
