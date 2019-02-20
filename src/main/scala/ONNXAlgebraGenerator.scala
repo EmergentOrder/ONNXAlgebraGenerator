@@ -171,7 +171,7 @@ println(typeStringMap)
           .replaceAll("split", "splitAttr")
           .replaceAll("scale", "scaleAttr") + " : " + (
                                                          "Option[") + "(" + result._2
-          .replaceAll("Tensor", "Tensor[T]") + 
+          .replaceAll("Tensor", "Tensor[T]") +  //Shouldn't need to do this; the type constraints are not encoded correctly on ONNX side. See hack later to replace for ConstantOfShape
           ")" +
           (if (required) "]" else "] = None")
         str
@@ -275,7 +275,7 @@ println(typeStringMap)
       "(" + 
       "name: String" +
       (if (requiredInputs(z).size > 0 || optionalInputs(z).size > 0 || variadicInputs(z).size > 0 || attributesStrings(z).size > 0) "," else "") +
-      attributesStrings(z) +
+      (if (x._1.contains("ConstantOfShape")) attributesStrings(z).replaceAll("Tensor\\[T\\]", "Tensor[T2]") else attributesStrings(z)) +
       (if (attributesStrings(z).size > 0 && requiredInputs(z).size > 0) "," else "") +
       processInput(requiredInputs(z), false, false) +
       (if ((requiredInputs(z).size > 0 || attributesStrings(z).size > 0) && optionalInputs(z).size > 0) "," else "") +
@@ -338,7 +338,7 @@ println(typeStringMap)
     "package" + (if(useFS) " object" else " object") + " onnx" +  (if(useFS) "Free " else " ") +
     "{\n" +
  (if(useFS) "" else "type |:"  + "[+A1, +A2] = Either[A1, A2]\n") + 
-    (if(useFS) "" else "  type Tensor[U] = Tuple2[Array[U],  Array[Int with Singleton]]\n") +
+    (if(useFS) "" else "  type Tensor[U] = Tuple2[Array[U],  Array[Int]]\n") +
     (if(useFS) "" else "  trait Operator\n") +
     (if(useFS) "" else "trait Graph\n") + //TODO: something with Graph
 //    (if(useFS) "" else typeStrings) + "\n" +
