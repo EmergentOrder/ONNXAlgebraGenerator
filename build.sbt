@@ -9,7 +9,7 @@ settings(
   )),
   name := "onnx-freestyle-algebra-generator",
   resolvers += Resolver.mavenLocal,
-//  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   resolvers += Resolver.jcenterRepo,
   publishArtifact in packageDoc := false,
   addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.7" cross CrossVersion.binary),
@@ -20,7 +20,7 @@ addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.
   scalacOptions ++= Seq("-feature", "-unchecked", "-deprecation", "-Ywarn-unused-import", "-Ywarn-unused:locals,privates"),
     libraryDependencies ++= Seq( 
 //      "org.bytedeco" % "javacpp" % "1.4.5-SNAPSHOT",
-      "org.bytedeco.javacpp-presets" % "onnx-platform" % "1.4.1-1.4.5-SNAPSHOT",
+        "org.bytedeco" % "onnx-platform" % "1.5.0-1.5.1-SNAPSHOT",
 //      "org.scalatest" %% "scalatest" % "3.0.5-M1" % Test,
       "org.typelevel" % "spire_2.12" % "0.16.0",
       "org.typelevel" % "cats-core_2.12" % "1.3.1",

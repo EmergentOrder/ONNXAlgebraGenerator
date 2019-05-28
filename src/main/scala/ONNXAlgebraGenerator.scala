@@ -82,23 +82,23 @@ val useFS = false
             .replaceAll("complex128", "Complex[Double]")
 
 
-  val attrTypeMap = Map(org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_UNDEFINED ->"Undefined",
-                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_FLOAT -> "Float",
-                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_INT -> "Int",
-                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_STRING -> "String",
-                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_TENSOR -> "Tensor",
-                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_GRAPH -> "Graph",
-                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_FLOATS -> "Array[Float]",
-                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_INTS -> "Array[Int]",
-                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_STRINGS -> "Array[String]",
-                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_TENSORS -> "Array[Tensor]",
-                      org.bytedeco.javacpp.onnx.AttributeProto_AttributeType_GRAPHS -> "Array[Graph]")
+  val attrTypeMap = Map(org.bytedeco.onnx.AttributeProto.UNDEFINED ->"Undefined",
+                      org.bytedeco.onnx.AttributeProto.FLOAT -> "Float",
+                      org.bytedeco.onnx.AttributeProto.INT -> "Int",
+                      org.bytedeco.onnx.AttributeProto.STRING -> "String",
+                      org.bytedeco.onnx.AttributeProto.TENSOR -> "Tensor",
+                      org.bytedeco.onnx.AttributeProto.GRAPH -> "Graph",
+                      org.bytedeco.onnx.AttributeProto.FLOATS -> "Array[Float]",
+                      org.bytedeco.onnx.AttributeProto.INTS -> "Array[Int]",
+                      org.bytedeco.onnx.AttributeProto.STRINGS -> "Array[String]",
+                      org.bytedeco.onnx.AttributeProto.TENSORS -> "Array[Tensor]",
+                      org.bytedeco.onnx.AttributeProto.GRAPHS -> "Array[Graph]")
 
 
-  val loaded =
-    org.bytedeco.javacpp.Loader.load(classOf[org.bytedeco.javacpp.onnx])
+//  val loaded =
+//    org.bytedeco.javacpp.Loader.load(classOf[org.bytedeco.onnx])
 
-  val schemas = org.bytedeco.javacpp.onnx.OpSchemaRegistry.get_all_schemas_with_history
+  val schemas = org.bytedeco.onnx.OpSchemaRegistry.get_all_schemas_with_history
   val schemasSize = schemas.size
   val scalaCollSchemas = (0 until schemasSize.toInt).map(x => schemas.get(x))
   val tuples = scalaCollSchemas.map(
@@ -209,7 +209,7 @@ println(typeStringMap)
       .map(z => y._4.get(z))
     }
 
-    def buildTypeStrings(in: IndexedSeq[org.bytedeco.javacpp.onnx.OpSchema.FormalParameter], inImplicit: IndexedSeq[String]) = {
+    def buildTypeStrings(in: IndexedSeq[org.bytedeco.onnx.OpSchema.FormalParameter], inImplicit: IndexedSeq[String]) = {
        (in.filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
          .zip(inImplicit)
         .map(y =>
@@ -225,7 +225,7 @@ println(typeStringMap)
           (if(useFS) "Free" else "") + " extends Operator" + (if(useFS) " with " + x._1 else "") + " {\n"
 
 
-        def generateDefStringSig(s: org.bytedeco.javacpp.onnx.OpSchema.FormalParameter) = {
+        def generateDefStringSig(s: org.bytedeco.onnx.OpSchema.FormalParameter) = {
            (if(useDotty) "(" else "ev" + s.GetTypeStr.getString + ":" + "(UNil TypeOr ") + typeStringMap(s.GetTypeStr.getString).map{ a =>
               val replaceParens = a.replaceAll("\\(", "[").replaceAll("\\)", "]")
               (if(replaceParens.contains("Tensor[")) replaceParens.stripPrefix("Tensor[").stripSuffix("]") else replaceParens)}
@@ -250,13 +250,13 @@ println(typeStringMap)
        val allImplicits = (requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).distinct.mkString(",")
 
 
-      def processInput(someInput: scala.collection.immutable.IndexedSeq[org.bytedeco.javacpp.onnx.OpSchema.FormalParameter], optional: Boolean, variadic: Boolean) = {
+      def processInput(someInput: scala.collection.immutable.IndexedSeq[org.bytedeco.onnx.OpSchema.FormalParameter], optional: Boolean, variadic: Boolean) = {
         someInput.map(y =>
           y.GetName.getString
             .replaceAll("var", "someVar")
 //            .replaceAll("shape", "shapeInput")
             + ": " + (if(variadic) "Seq[" else "") + "Option[" +
-                       (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) +
+                       (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) +
                          "]" + (if(variadic) "]" else "") + (if(optional && !variadic) " = None" else "") // + (if(variadic) "" else ", " + y.GetName.getString + "name: Option[String]" + (if(optional) " = None" else "") )
             )
         .map(y => if(optional) y.replaceAll("shape", "shapeInput") else y)
@@ -292,7 +292,7 @@ println(typeStringMap)
       (if(useFS) "FS[" else "") + "(" + 
       outputs(z)
       .map(y =>
-        "" + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) 
+        "" + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) 
       )
       .mkString(", ") + ")" + (if(useFS) "]" else "") +"\n"
           }.distinct.filter(a => ! (a.contains(" Concat1") || a.contains(" FeatureVectorizer1") || a.contains(" Max1") || a.contains(" Mean1") || a.contains(" Min1") || a.contains(" Scan8") || a.contains(" Sum1") )) //Blacklist ops with both optional attrs / inputs and variadic inputs: Scala cannot represent
