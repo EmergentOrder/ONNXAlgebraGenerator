@@ -220,9 +220,9 @@ println(typeStringMap)
     }
 
     val maxSinceVersion = (x._2.map(z => z._2) foldLeft 0)(Math.max)
-
-        val beginString = (if(useFS) "@free " else "") + "trait " + x._1 + 
-          (if(useFS) "Free" else "") + " extends Operator" + (if(useFS) " with " + x._1 else "") + " {\n"
+//TODO: Don't extend
+        val beginString = "trait " + x._1 + 
+          (if(useFS) "Free" else "") + " extends Operator" + " {\n"
 
 
         def generateDefStringSig(s: org.bytedeco.onnx.OpSchema.FormalParameter) = {
@@ -289,7 +289,7 @@ println(typeStringMap)
       (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).size > 0) "(implicit " else "") + allImplicits +  (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).size > 0) ")" else "")
       ) +
       "    : " + 
-      (if(useFS) "FS[" else "") + "(" + 
+      (if(useFS) "Task[" else "") + "(" + 
       outputs(z)
       .map(y =>
         "" + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) 
@@ -315,12 +315,9 @@ println(typeStringMap)
     .filter(a => a.contains("def")) 
     .mkString("\n")
 
+
   val fullSource = "package org.emergentorder\n\n" +
-    (if(useFS) "import freestyle.free._\n" else "") +
-    (if(useFS) "import freestyle.free.implicits._\n" else "") +
-    (if(useFS) "import cats.free.Free\n" else "") +
-    (if(useFS) "import cats.free.FreeApplicative\n" else "") +
-    (if(useFS) "import cats.effect.IO\n" else "") +
+    (if(useFS) "import scalaz.zio.Task\n" else "") +
     "import scala.language.higherKinds\n" + 
     "import scala.{specialized => sp}\n" +
     "import spire.math.UByte\n" +
@@ -333,7 +330,6 @@ println(typeStringMap)
     "import spire.algebra.Field\n" +
     "import scala.reflect.ClassTag\n" +
     (if(useFS) "import onnx._\n" else "") +
-    "import singleton.ops._\n\n" + 
 //    "import scala.language.higherKinds\n\n" +
     "package" + (if(useFS) " object" else " object") + " onnx" +  (if(useFS) "Free " else " ") +
     "{\n" +
@@ -377,16 +373,15 @@ println(typeStringMap)
     import UnionType._
     """
     ) +
-    (if(useFS) "@free " else "")  +
-    "trait DataSource" + (if(useFS) "Free extends DataSource" else "") + " {\n" +
+    "trait DataSource" + (if(useFS) "Free " else "") + " {\n" +
     "  def inputData" + (if(useFS) "Free" else "") + "[" + inputTypes + "]" + (if(useDotty) "" else checkedTypes) + ": " +
-    (if(useFS) "FS[" else "") +
+    (if(useFS) "Task[" else "") +
     "Tensor[T]" + (if(useFS) "]" else "") +"\n" +
     "  def getParams" + (if(useFS) "Free" else "") + "[" + inputTypes  + "](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
-    (if(useFS) "FS[" else "") +
+    (if(useFS) "Task[" else "") +
     "Tensor[T]" + (if(useFS) "]" else "") +"\n" +
     "  def getAttributes" + (if(useFS) "Free" else "") + "[" + inputTypes + "](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
-    (if(useFS) "FS[" else "") +
+    (if(useFS) "Task[" else "") +
     "Tensor[T]" + (if(useFS) "]" else "") +"\n" +
     "}\n" +
     traitStrings +
