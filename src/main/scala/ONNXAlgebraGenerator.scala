@@ -214,7 +214,7 @@ println(typeStringMap)
          .zip(inImplicit)
         .map(y =>
         "@sp " +
-        y._1.GetTypeStr.getString + (if(useDotty) " <: " + y._2 + ":" else " : ") + "Numeric:ClassTag"
+        y._1.GetTypeStr.getString + (if(useDotty) " <: " + y._2 + ":" else " : ") + "Numeric:ClassTag" //TODO: Don't add numeric if not required to be numeric
         )
       )
     }
@@ -333,41 +333,11 @@ println(typeStringMap)
 //    "import scala.language.higherKinds\n\n" +
     "package" + (if(useFS) " object" else " object") + " onnx" +  (if(useFS) "Free " else " ") +
     "{\n" +
- (if(useFS) "" else "type |:"  + "[+A1, +A2] = Either[A1, A2]\n") + 
     (if(useFS) "" else "  type Tensor[U] = Tuple2[Array[U],  Array[Int]]\n") +
     (if(useFS) "" else "  trait Operator\n") +
     (if(useFS) "" else "trait Graph\n") + //TODO: something with Graph
 //    (if(useFS) "" else typeStrings) + "\n" +
 //    "}\n" +
-    (if(useFS || useDotty) "" else """object UnionType {
-
-      trait inv[-A] {}
-
-      sealed trait OrR {
-        type L <: OrR
-        type R
-        type invIntersect
-        type intersect
-      }
-
-      sealed class TypeOr[A <: OrR, B] extends OrR {
-        type L = A
-        type R = B
-
-        type intersect = (L#intersect with R)
-        type invIntersect = (L#invIntersect with inv[R])
-        type check[X] = invIntersect <:< inv[X]
-      }
-
-      object UNil extends OrR {
-        type intersect = Any
-        type invIntersect = inv[Nothing]
-      }
-      type UNil = UNil.type
-
-    }
-    """
-    ) +
     (if(useDotty) "" else
     """
     import UnionType._
