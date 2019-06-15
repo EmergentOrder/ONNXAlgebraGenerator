@@ -12,38 +12,10 @@ import spire.implicits._
 import spire.algebra.Field
 import scala.reflect.ClassTag
 package object onnx {
-type |:[+A1, +A2] = Either[A1, A2]
   type Tensor[U] = Tuple2[Array[U],  Array[Int]]
   trait Operator
 trait Graph
-object UnionType {
 
-      trait inv[-A] {}
-
-      sealed trait OrR {
-        type L <: OrR
-        type R
-        type invIntersect
-        type intersect
-      }
-
-      sealed class TypeOr[A <: OrR, B] extends OrR {
-        type L = A
-        type R = B
-
-        type intersect = (L#intersect with R)
-        type invIntersect = (L#invIntersect with inv[R])
-        type check[X] = invIntersect <:< inv[X]
-      }
-
-      object UNil extends OrR {
-        type intersect = Any
-        type invIntersect = inv[Nothing]
-      }
-      type UNil = UNil.type
-
-    }
-    
     import UnionType._
     trait DataSource {
   def inputData[T : Numeric:ClassTag](implicit ev:(UNil TypeOr Float16 TypeOr Float TypeOr Double TypeOr Byte TypeOr Short TypeOr Int TypeOr Long TypeOr UByte TypeOr UShort TypeOr UInt TypeOr ULong TypeOr Complex[Float] TypeOr Complex[Double])#check[T]): Tensor[T]

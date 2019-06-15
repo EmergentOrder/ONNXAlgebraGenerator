@@ -1,6 +1,6 @@
 /*
  * ONNXAlgebraGenerator
- * Copyright (c) 2018 Alexander Merritt
+ * Copyright (c) 2018,2019 Alexander Merritt
  * All rights reserved. 
  * This program is free software: you can redistribute it and/or modify
  *
@@ -47,7 +47,7 @@ object ONNXAlgebraGenerator extends App {
 
 
 //Each operator used within a graph MUST be explicitly declared by one of the operator sets imported by the model.
-val useFS = false
+val useZIO = false
   val useDotty = false
   val unionTypeOperator = (if(useDotty) " | " else " TypeOr ")
   //Missing: Non-numeric, Boolean and String
@@ -61,7 +61,7 @@ val useFS = false
     def ===(other: A): Boolean = self == other
   }
 
-  val path = Paths.get("src/main/scala/ONNXAlgebra" + (if(useFS) "Free" else "") + ".scala");
+  val path = Paths.get("src/main/scala/ONNXAlgebra" + (if(useZIO) "ZIO" else "") + ".scala");
 
   def replaceTypeStrings(s: String) = s.replaceAll("uint64", "ULong")
             .replaceAll("uint32", "UInt")
@@ -222,7 +222,7 @@ println(typeStringMap)
     val maxSinceVersion = (x._2.map(z => z._2) foldLeft 0)(Math.max)
 //TODO: Don't extend
         val beginString = "trait " + x._1 + 
-          (if(useFS) "Free" else "") + " extends Operator" + " {\n"
+          (if(useZIO) "ZIO" else "") + " extends Operator" + " {\n"
 
 
         def generateDefStringSig(s: org.bytedeco.onnx.OpSchema.FormalParameter) = {
@@ -263,7 +263,7 @@ println(typeStringMap)
         .mkString(", ")
       }
 
-      "\n  def " + x._1 + x._2(z)._2.toString + (if(useFS)"Free" else "") +
+      "\n  def " + x._1 + x._2(z)._2.toString + (if(useZIO)"ZIO" else "") +
 //      (if(x._2(z)._2 < maxSinceVersion) x._2(z)._2.toString else "") +
       (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 ||variadicInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "[" else "") +
         (buildTypeStrings(requiredInputs(z), requiredImplicitsInputs) ++
@@ -289,12 +289,12 @@ println(typeStringMap)
       (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).size > 0) "(implicit " else "") + allImplicits +  (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).size > 0) ")" else "")
       ) +
       "    : " + 
-      (if(useFS) "Task[" else "") + "(" + 
+      (if(useZIO) "Task[" else "") + "(" + 
       outputs(z)
       .map(y =>
         "" + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) 
       )
-      .mkString(", ") + ")" + (if(useFS) "]" else "") +"\n"
+      .mkString(", ") + ")" + (if(useZIO) "]" else "") +"\n"
           }.distinct.filter(a => ! (a.contains(" Concat1") || a.contains(" FeatureVectorizer1") || a.contains(" Max1") || a.contains(" Mean1") || a.contains(" Min1") || a.contains(" Scan8") || a.contains(" Sum1") )) //Blacklist ops with both optional attrs / inputs and variadic inputs: Scala cannot represent
 .mkString("\n")
       val endString = "\n}"
@@ -317,7 +317,7 @@ println(typeStringMap)
 
 
   val fullSource = "package org.emergentorder\n\n" +
-    (if(useFS) "import scalaz.zio.Task\n" else "") +
+    (if(useZIO) "import scalaz.zio.Task\n" else "") +
     "import scala.language.higherKinds\n" + 
     "import scala.{specialized => sp}\n" +
     "import spire.math.UByte\n" +
@@ -329,30 +329,30 @@ println(typeStringMap)
     "import spire.implicits._\n" +
     "import spire.algebra.Field\n" +
     "import scala.reflect.ClassTag\n" +
-    (if(useFS) "import onnx._\n" else "") +
+    (if(useZIO) "import onnx._\n" else "") +
 //    "import scala.language.higherKinds\n\n" +
-    "package" + (if(useFS) " object" else " object") + " onnx" +  (if(useFS) "Free " else " ") +
+    "package" + (if(useZIO) " object" else " object") + " onnx" +  (if(useZIO) "ZIO " else " ") +
     "{\n" +
-    (if(useFS) "" else "  type Tensor[U] = Tuple2[Array[U],  Array[Int]]\n") +
-    (if(useFS) "" else "  trait Operator\n") +
-    (if(useFS) "" else "trait Graph\n") + //TODO: something with Graph
-//    (if(useFS) "" else typeStrings) + "\n" +
+    (if(useZIO) "" else "  type Tensor[U] = Tuple2[Array[U],  Array[Int]]\n") +
+    (if(useZIO) "" else "  trait Operator\n") +
+    (if(useZIO) "" else "trait Graph\n") + //TODO: something with Graph
+//    (if(useZIO) "" else typeStrings) + "\n" +
 //    "}\n" +
     (if(useDotty) "" else
     """
     import UnionType._
     """
     ) +
-    "trait DataSource" + (if(useFS) "Free " else "") + " {\n" +
-    "  def inputData" + (if(useFS) "Free" else "") + "[" + inputTypes + "]" + (if(useDotty) "" else checkedTypes) + ": " +
-    (if(useFS) "Task[" else "") +
-    "Tensor[T]" + (if(useFS) "]" else "") +"\n" +
-    "  def getParams" + (if(useFS) "Free" else "") + "[" + inputTypes  + "](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
-    (if(useFS) "Task[" else "") +
-    "Tensor[T]" + (if(useFS) "]" else "") +"\n" +
-    "  def getAttributes" + (if(useFS) "Free" else "") + "[" + inputTypes + "](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
-    (if(useFS) "Task[" else "") +
-    "Tensor[T]" + (if(useFS) "]" else "") +"\n" +
+    "trait DataSource" + (if(useZIO) "ZIO " else "") + " {\n" +
+    "  def inputData" + (if(useZIO) "ZIO" else "") + "[" + inputTypes + "]" + (if(useDotty) "" else checkedTypes) + ": " +
+    (if(useZIO) "Task[" else "") +
+    "Tensor[T]" + (if(useZIO) "]" else "") +"\n" +
+    "  def getParams" + (if(useZIO) "ZIO" else "") + "[" + inputTypes  + "](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
+    (if(useZIO) "Task[" else "") +
+    "Tensor[T]" + (if(useZIO) "]" else "") +"\n" +
+    "  def getAttributes" + (if(useZIO) "ZIO" else "") + "[" + inputTypes + "](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
+    (if(useZIO) "Task[" else "") +
+    "Tensor[T]" + (if(useZIO) "]" else "") +"\n" +
     "}\n" +
     traitStrings +
     "}\n"
