@@ -317,7 +317,7 @@ println(typeStringMap)
 
 
   val fullSource = "package org.emergentorder\n\n" +
-    (if(useZIO) "import scalaz.zio.Task\n" else "") +
+    (if(useZIO) "import zio.Task\n" else "") +
     "import scala.language.higherKinds\n" + 
     "import scala.{specialized => sp}\n" +
     "import spire.math.UByte\n" +
