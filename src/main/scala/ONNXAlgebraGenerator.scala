@@ -340,17 +340,11 @@ println(typeStringMap)
 //    "}\n" +
     (if(useDotty) "" else
     """
-    import UnionType._
+    import org.emergentorder.union.UnionType._
     """
     ) +
     "trait DataSource" + (if(useZIO) "ZIO " else "") + " {\n" +
-    "  def inputData" + (if(useZIO) "ZIO" else "") + "[" + inputTypes + "]" + (if(useDotty) "" else checkedTypes) + ": " +
-    (if(useZIO) "Task[" else "") +
-    "Tensor[T]" + (if(useZIO) "]" else "") +"\n" +
     "  def getParams" + (if(useZIO) "ZIO" else "") + "[" + inputTypes  + "](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
-    (if(useZIO) "Task[" else "") +
-    "Tensor[T]" + (if(useZIO) "]" else "") +"\n" +
-    "  def getAttributes" + (if(useZIO) "ZIO" else "") + "[" + inputTypes + "](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
     (if(useZIO) "Task[" else "") +
     "Tensor[T]" + (if(useZIO) "]" else "") +"\n" +
     "}\n" +
