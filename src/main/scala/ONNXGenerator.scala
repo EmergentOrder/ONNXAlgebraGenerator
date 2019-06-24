@@ -1,5 +1,5 @@
 /*
- * ONNXAlgebraGenerator
+ * ONNXGenerator
  * Copyright (c) 2018,2019 Alexander Merritt
  * All rights reserved. 
  * This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ import scala.meta._
 import java.nio.file.Files
 import java.nio.file.Paths
 
-object ONNXAlgebraGenerator extends App {
+object ONNXGenerator extends App {
 //TODO: Enforce shape constraints - using dependent types via singleton and higher-kinded
 //TODO: Use numsca for Tensor[Doubles only] ?  or tensorflow_scala[Generic, but not typed by shape] 
 //or MXNet[ supprots Float16,Float32,Float64,Int32,UInt8, but most operators Float32 and 64 only] or Compute.scala[Float only, others on roadmap] or none
@@ -61,7 +61,7 @@ val useZIO = false
     def ===(other: A): Boolean = self == other
   }
 
-  val path = Paths.get("src/main/scala/ONNXAlgebra" + (if(useZIO) "ZIO" else "") + ".scala");
+  val path = Paths.get("src/main/scala/ONNX" + (if(useZIO) "ZIO" else "") + ".scala");
 
   def replaceTypeStrings(s: String) = s.replaceAll("uint64", "ULong")
             .replaceAll("uint32", "UInt")
@@ -333,9 +333,21 @@ println(typeStringMap)
 //    "import scala.language.higherKinds\n\n" +
     "package" + (if(useZIO) " object" else " object") + " onnx" +  (if(useZIO) "ZIO " else " ") +
     "{\n" +
-    (if(useZIO) "" else "  type Tensor[U] = Tuple2[Array[U],  Array[Int]]\n") +
+    (if(useZIO) "" else 
+  """
+  type Tensor[T] = Tuple2[Array[T], Array[Int]]
+
+  trait Dim
+
+  sealed trait Scalar
+  sealed trait Vec[T <: Dim]
+  sealed trait Mat[T <: Dim, U <: Dim]
+  sealed trait Tuple3OfDim[T <: Dim, U <: Dim, V <: Dim]
+
+  final case class TypesafeTensor[T, AxisType](tens: Tensor[T])
+  """ + "\n") +
     (if(useZIO) "" else "  trait Operator\n") +
-    (if(useZIO) "" else "trait Graph\n") + //TODO: something with Graph
+    (if(useZIO) "" else "  trait Graph\n") + //TODO: something with Graph
 //    (if(useZIO) "" else typeStrings) + "\n" +
 //    "}\n" +
     (if(useDotty) "" else
