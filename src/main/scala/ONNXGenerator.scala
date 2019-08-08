@@ -47,7 +47,7 @@ object ONNXGenerator extends App {
 
 
 //Each operator used within a graph MUST be explicitly declared by one of the operator sets imported by the model.
-val useZIO = false
+val useZIO = true
   val useDotty = false
   val unionTypeOperator = (if(useDotty) " | " else " TypeOr ")
   //Missing: Non-numeric, Boolean and String
@@ -229,6 +229,7 @@ println(typeStringMap)
            (if(useDotty) "(" else "ev" + s.GetTypeStr.getString + ":" + "(UNil TypeOr ") + typeStringMap(s.GetTypeStr.getString).map{ a =>
               val replaceParens = a.replaceAll("\\(", "[").replaceAll("\\)", "]")
               (if(replaceParens.contains("Tensor[")) replaceParens.stripPrefix("Tensor[").stripSuffix("]") else replaceParens)}
+                            .distinct
                             .mkString(unionTypeOperator) +
                               (if(useDotty) ")" else ")#check" + "[" + s.GetTypeStr.getString + "]" )
         }
