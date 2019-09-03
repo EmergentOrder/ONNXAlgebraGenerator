@@ -47,14 +47,14 @@ object ONNXGenerator extends App {
 
 
 //Each operator used within a graph MUST be explicitly declared by one of the operator sets imported by the model.
-val useZIO = true
+val useZIO = false
   val useDotty = false
-  val unionTypeOperator = (if(useDotty) " | " else " TypeOr ")
+  val unionTypeOperator = "#or"
   //Missing: Non-numeric, Boolean and String
 
-  val checkedTypes = (if(useDotty) "(" else "(implicit ev:(UNil TypeOr ") + "Float16" + unionTypeOperator + "Float" + unionTypeOperator + "Double" + unionTypeOperator + "Byte" + unionTypeOperator + "Short" + unionTypeOperator + "Int" + unionTypeOperator + "Long" + unionTypeOperator + "UByte" + unionTypeOperator + "UShort" + unionTypeOperator + "UInt" + unionTypeOperator + "ULong" + unionTypeOperator + "Complex[Float]" + unionTypeOperator + "Complex[Double]" + (if(useDotty) ")" else ")#check[T])")
+//  val checkedTypes = (if(useDotty) "(" else "(implicit ev:(UNil TypeOr ") + "Float16" + unionTypeOperator + "Float" + unionTypeOperator + "Double" + unionTypeOperator + "Byte" + unionTypeOperator + "Short" + unionTypeOperator + "Int" + unionTypeOperator + "Long" + unionTypeOperator + "UByte" + unionTypeOperator + "UShort" + unionTypeOperator + "UInt" + unionTypeOperator + "ULong" + unionTypeOperator + "Complex[Float]" + unionTypeOperator + "Complex[Double]" + (if(useDotty) ")" else ")#check[T])")
 
-  val inputTypes = "T " + (if(useDotty) "<: " + checkedTypes + ":" else ": ")  + "Numeric:ClassTag"
+  val inputTypes = "T " + ( ": ")  + "Numeric:ClassTag"
 
   @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   implicit final class AnyOps[A](self: A) {
@@ -214,7 +214,7 @@ println(typeStringMap)
          .zip(inImplicit)
         .map(y =>
         "@sp " +
-        y._1.GetTypeStr.getString + (if(useDotty) " <: " + y._2 + ":" else " : ") + "Numeric:ClassTag" //TODO: Don't add numeric if not required to be numeric
+        y._1.GetTypeStr.getString + ( " : ") + "Numeric:ClassTag" //TODO: Don't add numeric if not required to be numeric
         )
       )
     }
@@ -226,12 +226,12 @@ println(typeStringMap)
 
 
         def generateDefStringSig(s: org.bytedeco.onnx.OpSchema.FormalParameter) = {
-           (if(useDotty) "(" else "ev" + s.GetTypeStr.getString + ":" + "(UNil TypeOr ") + typeStringMap(s.GetTypeStr.getString).map{ a =>
-              val replaceParens = a.replaceAll("\\(", "[").replaceAll("\\)", "]")
+           ( "ev" + s.GetTypeStr.getString + ":" + "Contains[" + s.GetTypeStr.getString + ", Union[") + typeStringMap(s.GetTypeStr.getString).map{ a =>
+              val replaceParens = (a).replaceAll("\\(", "[").replaceAll("\\)", "]")
               (if(replaceParens.contains("Tensor[")) replaceParens.stripPrefix("Tensor[").stripSuffix("]") else replaceParens)}
                             .distinct
-                            .mkString(unionTypeOperator) +
-                              (if(useDotty) ")" else ")#check" + "[" + s.GetTypeStr.getString + "]" )
+                            .mkString("]" + unionTypeOperator + "[") +
+                              ("]#or[UNil]#create]")
         }
 
         val defStrings = (0 until 
@@ -285,8 +285,7 @@ println(typeStringMap)
             ","
        else "") + processInput(variadicInputs(z), false, true) +
       ")\n" +
-      (if(useDotty) ""
-      else
+      (
       (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).size > 0) "(implicit " else "") + allImplicits +  (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).size > 0) ")" else "")
       ) +
       "    : " + 
@@ -329,13 +328,29 @@ println(typeStringMap)
     "import spire.math.Numeric\n" +
     "import spire.implicits._\n" +
     "import spire.algebra.Field\n" +
-    "import scala.reflect.ClassTag\n" +
+    "import scala.reflect.ClassTag\n" + 
     (if(useZIO) "import onnx._\n" else "") +
 //    "import scala.language.higherKinds\n\n" +
     "package" + (if(useZIO) " object" else " object") + " onnx" +  (if(useZIO) "ZIO " else " ") +
     "{\n" +
     (if(useZIO) "" else 
   """
+  type ![A] = A => Nothing
+  type !![A] = ![![A]]
+
+  trait Disjunction[T] {
+    type or[S] = Disjunction[T with ![S]]
+    type create = ![T]
+  }
+
+  type Union[T] = {
+    type or[S] = Disjunction[![T]]#or[S]
+  }
+
+  type Contains[S, T] = !![S] <:< T
+
+  type UNil
+
   trait Dim
 
   sealed trait Axes
@@ -353,13 +368,8 @@ println(typeStringMap)
     (if(useZIO) "" else "  trait Graph\n") + //TODO: something with Graph
 //    (if(useZIO) "" else typeStrings) + "\n" +
 //    "}\n" +
-    (if(useDotty) "" else
-    """
-    import org.emergentorder.union.UnionType._
-    """
-    ) +
     "trait DataSource" + (if(useZIO) "ZIO " else "") + " {\n" +
-    "  def getParams" + (if(useZIO) "ZIO" else "") + "[" + inputTypes  + "](name: String)" + (if(useDotty) "" else checkedTypes) + ": " +
+    "  def getParams" + (if(useZIO) "ZIO" else "") + "[" + inputTypes  + "](name: String)" + ("") + ": " +
     (if(useZIO) "Task[" else "") +
     "Tensor[T]" + (if(useZIO) "]" else "") +"\n" +
     "}\n" +
