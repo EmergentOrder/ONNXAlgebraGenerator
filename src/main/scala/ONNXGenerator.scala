@@ -92,8 +92,9 @@ val useZIO = false
                       org.bytedeco.onnx.AttributeProto.INTS -> "Array[Int]",
                       org.bytedeco.onnx.AttributeProto.STRINGS -> "Array[String]",
                       org.bytedeco.onnx.AttributeProto.TENSORS -> "Array[Tensor]",
-                      org.bytedeco.onnx.AttributeProto.GRAPHS -> "Array[Graph]")
-
+                      org.bytedeco.onnx.AttributeProto.GRAPHS -> "Array[Graph]",
+                      org.bytedeco.onnx.AttributeProto.SPARSE_TENSOR -> "SparseTensor",
+                      org.bytedeco.onnx.AttributeProto.SPARSE_TENSORS -> "Array[SparseTensor]")
 
 //  val loaded =
 //    org.bytedeco.javacpp.Loader.load(classOf[org.bytedeco.onnx])
@@ -248,7 +249,7 @@ println(typeStringMap)
            val implicitsOutputs = (outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
            .map(y =>  generateDefStringSig(y)))
 
-       val allImplicits = (requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).distinct.mkString(",")
+       val allImplicits = (requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).distinct.mkString(",").replaceAll("tensor", "Tensor")
 
 
       def processInput(someInput: scala.collection.immutable.IndexedSeq[org.bytedeco.onnx.OpSchema.FormalParameter], optional: Boolean, variadic: Boolean) = {
@@ -363,6 +364,7 @@ println(typeStringMap)
   type TypesafeTensor[T, A <: Axes] = Tuple2[Array[T], Array[Int]]
 
   type Tensor[T] = TypesafeTensor[T, Axes]
+  type SparseTensor[T] = Tensor[T]
   """ + "\n") +
     (if(useZIO) "" else "  trait Operator\n") +
     (if(useZIO) "" else "  trait Graph\n") + //TODO: something with Graph

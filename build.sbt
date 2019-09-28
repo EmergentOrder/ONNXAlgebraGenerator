@@ -20,7 +20,7 @@ addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.
   scalacOptions ++= Seq("-feature", "-unchecked", "-deprecation", "-Ywarn-unused-import", "-Ywarn-unused:locals,privates"),
     libraryDependencies ++= Seq( 
 //      "org.bytedeco" % "javacpp" % "1.4.5-SNAPSHOT",
-        "org.bytedeco" % "onnx-platform" % "1.5.0-1.5.1-SNAPSHOT",
+        "org.bytedeco" % "onnx-platform" % "1.6.0-1.5.2-SNAPSHOT",
 //      "org.scalatest" %% "scalatest" % "3.0.5-M1" % Test,
       "org.typelevel" % "spire_2.12" % "0.16.0",
       "org.typelevel" % "cats-core_2.12" % "1.3.1",
@@ -37,6 +37,6 @@ addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.
     wartremoverErrors ++= Warts.allBut(Wart.PublicInference),
     wartremoverExcluded += baseDirectory.value / "src" / "main" / "scala" / "Float16.scala",
     //TODO: exclude only complaint for default arguments
-    wartremoverExcluded += baseDirectory.value / "src" / "main" / "scala" / "ONNXAlgebra.scala",
+    wartremoverExcluded += baseDirectory.value / "src" / "main" / "scala" / "ONNX.scala",
     wartremoverExcluded += baseDirectory.value / "src" / "main" / "scala" / "ONNXAlgebraFree.scala"
 )
