@@ -256,48 +256,67 @@ println(typeStringMap)
         someInput.map(y =>
           y.GetName.getString
             .replaceAll("var", "someVar")
-//            .replaceAll("shape", "shapeInput")
+            .replaceAll("shape", "shapeInput")
             + ": " + (if(variadic) "Seq[" else "") + "Option[" +
                        (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) +
                          "]" + (if(variadic) "]" else "") + (if(optional && !variadic) " = None" else "") // + (if(variadic) "" else ", " + y.GetName.getString + "name: Option[String]" + (if(optional) " = None" else "") )
             )
-        .map(y => if(optional) y.replaceAll("shape", "shapeInput") else y)
-        .mkString(", ")
+//        .map(y => if(optional) y.replaceAll("shape", "shapeInput") else y)
+//        .mkString(", ")
       }
+
+
+      def processOutputs = {
+        outputs(z)
+      .map(y =>
+        "" + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) 
+        )
+      }
+
+        val typeStrings = (buildTypeStrings(requiredInputs(z), requiredImplicitsInputs) ++
+         buildTypeStrings(optionalInputs(z), optionalImplicitsInputs) ++
+         buildTypeStrings(variadicInputs(z), variadicImplicitsInputs) ++
+         buildTypeStrings(outputs(z), implicitsOutputs)            
+        )
+
+        val requiredProcessedInputs = processInput(requiredInputs(z), false, false)
+        val optionalProcessedInputs = processInput(optionalInputs(z), true, false)
+        val variadicProcessedInputs = processInput(variadicInputs(z), false, true)
+
+        val allProcessedInputs = requiredProcessedInputs ++ optionalProcessedInputs ++ variadicProcessedInputs
 
       "\n  def " + x._1 + x._2(z)._2.toString + (if(useZIO)"ZIO" else "") +
 //      (if(x._2(z)._2 < maxSinceVersion) x._2(z)._2.toString else "") +
       (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 ||variadicInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "[" else "") +
-        (buildTypeStrings(requiredInputs(z), requiredImplicitsInputs) ++
-         buildTypeStrings(optionalInputs(z), optionalImplicitsInputs) ++
-         buildTypeStrings(variadicInputs(z), variadicImplicitsInputs) ++
-         buildTypeStrings(outputs(z), implicitsOutputs)            
-        ).distinct.mkString(",") +
+        typeStrings.distinct.mkString(",") +
       (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || variadicInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "]" else "") +
       "(" + 
       "name: String" +
       (if (requiredInputs(z).size > 0 || optionalInputs(z).size > 0 || variadicInputs(z).size > 0 || attributesStrings(z).size > 0) "," else "") +
       (if (x._1.contains("ConstantOfShape")) attributesStrings(z).replaceAll("Tensor\\[T\\]", "Tensor[T2]") else attributesStrings(z)) +
       (if (attributesStrings(z).size > 0 && requiredInputs(z).size > 0) "," else "") +
-      processInput(requiredInputs(z), false, false) +
+      requiredProcessedInputs.mkString(", ") +
       (if ((requiredInputs(z).size > 0 || attributesStrings(z).size > 0) && optionalInputs(z).size > 0) "," else "") +
-      processInput(optionalInputs(z), true, false) +
+      optionalProcessedInputs.mkString(", ") + 
       (if (variadicInputs(z).size > 0 && (requiredInputs(z).size + optionalInputs(z).size + attributesStrings(z).size) > 0)
             ","
-       else "") + processInput(variadicInputs(z), false, true) +
+       else "") + variadicProcessedInputs.mkString(", ") +
       ")\n" +
       (
       (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).size > 0) "(implicit " else "") + allImplicits +  (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).size > 0) ")" else "")
       ) +
       "    : " + 
       (if(useZIO) "Task[" else "") + "(" + 
-      outputs(z)
-      .map(y =>
-        "" + (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) 
-      )
-      .mkString(", ") + ")" + (if(useZIO) "]" else "") +"\n"
+      processOutputs(0) + (if(useZIO) "]" else ")") +"\n" +
+//Body
+" = {\n" + "val map: Map[String, Any] = Map(" + attributesStrings(z).split(",").filter(!_.isEmpty).map{ i => "\"" + i.split(":")(0) + "\"" + " -> " + i.split(":")(0) + "\n"}.mkString(",") +
+        ")\n" +
+        "val allInputs = (" + (requiredInputs(z).map{i =>  i.GetName.getString.replaceAll("var", "someVar")} ++ optionalInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")} ++ variadicInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")} ++ (0 until (9 - (optionalInputs(z).size + requiredInputs(z).size + variadicInputs(z).size))).map(_ => "None : Option[Any]")).map(i => i.replaceAll("shape", "shapeInput")).mkString(",") + ")" + 
+        "\n" + 
+        "(callOp" + "[" + (allProcessedInputs.map(i => i.split(":")(1).split("=")(0)) ++ (0 until (9 - allProcessedInputs.size)).map(_ => "Any") ++ processOutputs ++ (0 until (9 - processOutputs.size)).map(_ => "Any")).mkString(",") +"]" + "(name,\"" + x._1 + "\"," + "allInputs, map))" +"\n}"
           }.distinct.filter(a => ! (a.contains(" Concat1") || a.contains(" FeatureVectorizer1") || a.contains(" Max1") || a.contains(" Mean1") || a.contains(" Min1") || a.contains(" Scan8") || a.contains(" Sum1") )) //Blacklist ops with both optional attrs / inputs and variadic inputs: Scala cannot represent
 .mkString("\n")
+
       val endString = "\n}"
 
       val traitString = beginString + defStrings + endString
@@ -330,6 +349,7 @@ println(typeStringMap)
     "import spire.implicits._\n" +
     "import spire.algebra.Field\n" +
     "import scala.reflect.ClassTag\n" + 
+    "import org.bytedeco.onnx.ModelProto\n" + 
     (if(useZIO) "import onnx._\n" else "") +
 //    "import scala.language.higherKinds\n\n" +
     "package" + (if(useZIO) " object" else " object") + " onnx" +  (if(useZIO) "ZIO " else " ") +
@@ -365,8 +385,49 @@ println(typeStringMap)
 
   type Tensor[T] = TypesafeTensor[T, Axes]
   type SparseTensor[T] = Tensor[T]
+
+  type XInt = Int with Singleton
+
+  object TensorFactory {
+    def getTensor[T](data: Array[T], t: Array[Int]): Tensor[T] = {
+      require(data.size == t.foldLeft(1)(_ * _))
+      (data, t)
+    }
+   }
   """ + "\n") +
-    (if(useZIO) "" else "  trait Operator\n") +
+    (if(useZIO) "" else """
+   
+  trait Operator{
+    def callOp[T: ClassTag, T1: ClassTag, T2: ClassTag, T3: ClassTag, T4: ClassTag, T5: ClassTag, T6: ClassTag, T7: ClassTag, T8: ClassTag,
+      T9: ClassTag, T10: ClassTag, T11: ClassTag, T12: ClassTag, T13: ClassTag, T14: ClassTag, T15: ClassTag, T16: ClassTag, T17: ClassTag](
+      name: String,
+      opName: String, 
+      inputs: Tuple9[T, T1, T2, T3, T4, T5, T6, T7, T8],
+
+      //    outName: String,
+      attrs: Map[String, Any]
+    ): (T9) = {
+    val opModel = callOpModel(name, opName, inputs, "outName", attrs)
+    opFromModel[T, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](opModel, inputs)
+    }
+
+    def opFromModel[T: ClassTag, T1: ClassTag, T2: ClassTag, T3: ClassTag, T4: ClassTag, T5: ClassTag, T6: ClassTag, T7: ClassTag, T8: ClassTag,
+      T9: ClassTag, T10: ClassTag, T11: ClassTag, T12: ClassTag, T13: ClassTag, T14: ClassTag, T15: ClassTag, T16: ClassTag, T17: ClassTag]( 
+      opModel: ModelProto,
+      inputs: Tuple9[T, T1, T2, T3, T4, T5, T6, T7, T8] 
+    ): (T9)
+  
+
+    def callOpModel[T: ClassTag, T1: ClassTag, T2: ClassTag, T3: ClassTag, T4: ClassTag, T5: ClassTag, T6: ClassTag, T7: ClassTag, T8: ClassTag]( 
+      name: String,
+      opName: String,
+      inputs: Tuple9[T, T1, T2, T3, T4, T5, T6, T7, T8],
+      outName: String,
+      attrs: Map[String, Any]
+     ): (ModelProto)
+  } 
+
+      """ ) +
     (if(useZIO) "" else "  trait Graph\n") + //TODO: something with Graph
 //    (if(useZIO) "" else typeStrings) + "\n" +
 //    "}\n" +
