@@ -23,7 +23,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 object ONNXGenerator extends App {
-//TODO: Enforce shape constraints - using dependent types via singleton and higher-kinded
+//TODO: Grab doc strings and put them in scaladoc
+  //TODO: Enforce shape constraints - using dependent types via singleton and higher-kinded
 //TODO: Use numsca for Tensor[Doubles only] ?  or tensorflow_scala[Generic, but not typed by shape] 
 //or MXNet[ supprots Float16,Float32,Float64,Int32,UInt8, but most operators Float32 and 64 only] or Compute.scala[Float only, others on roadmap] or none
 // LATEST: Use Tensorics, create Scala wrapper
@@ -31,8 +32,6 @@ object ONNXGenerator extends App {
 // "Version numbers can be used as a simple number, or used to encode semantic versions. If using semver, the convention is to use the two most significant bytes for the major number, the next two bytes for the minor number, and the least significant four bytes for the build/bugfix number. When using semver versioning, at least one of the major/minor numbers MUST be non-zero."
 //
 //TODO: Be explicit about IR VERSION
-
-//TODO: ONNXIFI support
 
 //Tensor Shape-
 //Each size in the list MUST be expressed as an integral value or as a "dimension variable," a string denoting that the actual size of the dimension is not statically constrained to a particular number. This is useful for declaring interfaces that care about the number of dimensions, but not the exact size of each dimension.
@@ -50,8 +49,8 @@ object ONNXGenerator extends App {
 val useZIO = false
   val useDotty = false
   val unionTypeOperator = "#or"
-  //Missing: Non-numeric, Boolean and String
 
+  //Missing: Non-numeric, Boolean and String
 //  val checkedTypes = (if(useDotty) "(" else "(implicit ev:(UNil TypeOr ") + "Float16" + unionTypeOperator + "Float" + unionTypeOperator + "Double" + unionTypeOperator + "Byte" + unionTypeOperator + "Short" + unionTypeOperator + "Int" + unionTypeOperator + "Long" + unionTypeOperator + "UByte" + unionTypeOperator + "UShort" + unionTypeOperator + "UInt" + unionTypeOperator + "ULong" + unionTypeOperator + "Complex[Float]" + unionTypeOperator + "Complex[Double]" + (if(useDotty) ")" else ")#check[T])")
 
   val inputTypes = "T " + ( ": ")  + "Numeric:ClassTag"
@@ -200,10 +199,10 @@ println(typeStringMap)
     }
 
   
-    //TODO: Handle optional outputs?
+    //TODO: Handle optional outputs
     //"Each node referring to an operator with optional outputs MUST provide a name for each output that is computed and MUST NOT provide names for outputs that are not computed."
     //TODO: empty string name means input or output is optional and unspecified
-    //TODO: Distinguish between ONNX and ONNX-ML ops and data types
+
 
     val outputs = x._2.map{y =>
       (0 until y._4.size.toInt)
@@ -221,7 +220,7 @@ println(typeStringMap)
     }
 
     val maxSinceVersion = (x._2.map(z => z._2) foldLeft 0)(Math.max)
-//TODO: Don't extend
+
         val beginString = "trait " + x._1 + 
           (if(useZIO) "ZIO" else "") + " extends Operator" + " {\n"
 
