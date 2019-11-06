@@ -395,36 +395,60 @@ println(typeStringMap)
    }
   """ + "\n") +
     (if(useZIO) "" else """
-   
-  trait Operator{
-    def callOp[T: ClassTag, T1: ClassTag, T2: ClassTag, T3: ClassTag, T4: ClassTag, T5: ClassTag, T6: ClassTag, T7: ClassTag, T8: ClassTag,
-      T9: ClassTag, T10: ClassTag, T11: ClassTag, T12: ClassTag, T13: ClassTag, T14: ClassTag, T15: ClassTag, T16: ClassTag, T17: ClassTag](
-      name: String,
-      opName: String, 
-      inputs: Tuple9[T, T1, T2, T3, T4, T5, T6, T7, T8],
-
-      //    outName: String,
-      attrs: Map[String, Any]
-    ): (T9) = {
-    val opModel = callOpModel(name, opName, inputs, "outName", attrs)
-    opFromModel[T, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](opModel, inputs)
-    }
-
-    def opFromModel[T: ClassTag, T1: ClassTag, T2: ClassTag, T3: ClassTag, T4: ClassTag, T5: ClassTag, T6: ClassTag, T7: ClassTag, T8: ClassTag,
-      T9: ClassTag, T10: ClassTag, T11: ClassTag, T12: ClassTag, T13: ClassTag, T14: ClassTag, T15: ClassTag, T16: ClassTag, T17: ClassTag]( 
-      opModel: ModelProto,
-      inputs: Tuple9[T, T1, T2, T3, T4, T5, T6, T7, T8] 
-    ): (T9)
   
+    trait Operator {
+    def callOp[
+        T: ClassTag,
+        T1: ClassTag,
+        T2: ClassTag,
+        T3: ClassTag,
+        T4: ClassTag,
+        T5: ClassTag,
+        T6: ClassTag,
+        T7: ClassTag,
+        T8: ClassTag,
+        T9: ClassTag,
+        T10: ClassTag,
+        T11: ClassTag,
+        T12: ClassTag,
+        T13: ClassTag,
+        T14: ClassTag,
+        T15: ClassTag,
+        T16: ClassTag,
+        T17: ClassTag
+    ](
+        name: String,
+        opName: String,
+        inputs: Tuple9[T, T1, T2, T3, T4, T5, T6, T7, T8],
+        //    outName: String,
+        attrs: Map[String, Any]
+    ): (T9)
+  }
 
-    def callOpModel[T: ClassTag, T1: ClassTag, T2: ClassTag, T3: ClassTag, T4: ClassTag, T5: ClassTag, T6: ClassTag, T7: ClassTag, T8: ClassTag]( 
-      name: String,
-      opName: String,
-      inputs: Tuple9[T, T1, T2, T3, T4, T5, T6, T7, T8],
-      outName: String,
-      attrs: Map[String, Any]
-     ): (ModelProto)
-  } 
+  abstract class Model(onnxBytes: Array[Byte]) extends Operator{
+    def fullModel[
+      T: ClassTag,
+      T1: ClassTag,
+      T2: ClassTag,
+      T3: ClassTag,
+      T4: ClassTag,
+      T5: ClassTag,
+      T6: ClassTag,
+      T7: ClassTag,
+      T8: ClassTag,
+      T9: ClassTag,
+      T10: ClassTag,
+      T11: ClassTag,
+      T12: ClassTag,
+      T13: ClassTag,
+      T14: ClassTag,
+      T15: ClassTag,
+      T16: ClassTag,
+      T17: ClassTag
+    ](
+      inputs: Tuple9[T, T1, T2, T3, T4, T5, T6, T7, T8]
+  ): (T9)
+  }
 
       """ ) +
     (if(useZIO) "" else "  trait Graph\n") + //TODO: something with Graph
