@@ -310,11 +310,12 @@ println(typeStringMap)
 //Body
 " = {\n" + "val map: Map[String, Any] = Map(" + attributesStrings(z).split(",").filter(!_.isEmpty).map{ i => "\"" + i.split(":")(0).trim() + "\"" + " -> " + i.split(":")(0) + "\n"}.mkString(",") +
         ")\n" +
-        "val allInputs = (" + (requiredInputs(z).map{i =>  i.GetName.getString.replaceAll("var", "someVar")} ++ optionalInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")} ++ variadicInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")} ++ (0 until (9 - (optionalInputs(z).size + requiredInputs(z).size + variadicInputs(z).size))).map(_ => "None : Option[Any]")).map(i => i.replaceAll("shape", "shapeInput")).mkString(",") + ")" + 
+        "val allInputs = (" + (requiredInputs(z).map{i =>  i.GetName.getString.replaceAll("var", "someVar")} ++ optionalInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")} ++ (0 until (9 - (optionalInputs(z).size + requiredInputs(z).size))).map{t => if(variadicInputs(z).size > 0) { variadicInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar") + ".lift(" + t.toString + ").flatten" }.mkString(",")} else { "None : Option[Any]"}}).map(i => i.replaceAll("shape", "shapeInput")).mkString(",") + ")" + 
         "\n" + 
-        "(callOp" + "[" + (allProcessedInputs.map(i => i.split(":")(1).split("=")(0)) ++ (0 until (9 - allProcessedInputs.size)).map(_ => "Any") ++ processOutputs ++ (0 until (9 - processOutputs.size)).map(_ => "Any")).mkString(",") +"]" + "(name,\"" + x._1 + "\"," + "allInputs, map))" +"\n}"
-          }.distinct.filter(a => ! (a.contains(" Concat1") || a.contains(" FeatureVectorizer1") || a.contains(" Max1") || a.contains(" Mean1") || a.contains(" Min1") || a.contains(" Scan8") || a.contains(" Sum1") )) //Blacklist ops with both optional attrs / inputs and variadic inputs: Scala cannot represent
-.mkString("\n")
+        "(callOp" +
+        "[" + (allProcessedInputs.map(i => i.split(":")(1).split("=")(0)) ++ (0 until (9 - allProcessedInputs.size)).map(_ => if(variadicInputs(z).isEmpty){"Any"} else {variadicProcessedInputs.map(i => i.split(":")(1).split("=")(0)).mkString(",")}) ++ processOutputs ++ (0 until (9 - processOutputs.size)).map(_ => "Any")).mkString(",").replaceAll("Seq\\[", "").replaceAll("\\]\\]\\]", "\\]\\]") +"]" +
+        "(name,\"" + x._1 + "\"," + "allInputs, map))" +"\n}"
+          }.distinct.mkString("\n")
 
       val endString = "\n}"
 
