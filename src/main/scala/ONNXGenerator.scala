@@ -308,7 +308,7 @@ println(typeStringMap)
       (if(useZIO) "Task[" else "") + "(" + 
       processOutputs(0) + (if(useZIO) "]" else ")") +"\n" +
 //Body
-" = {\n" + "val map: Map[String, Any] = Map(" + attributesStrings(z).split(",").filter(!_.isEmpty).map{ i => "\"" + i.split(":")(0) + "\"" + " -> " + i.split(":")(0) + "\n"}.mkString(",") +
+" = {\n" + "val map: Map[String, Any] = Map(" + attributesStrings(z).split(",").filter(!_.isEmpty).map{ i => "\"" + i.split(":")(0).trim() + "\"" + " -> " + i.split(":")(0) + "\n"}.mkString(",") +
         ")\n" +
         "val allInputs = (" + (requiredInputs(z).map{i =>  i.GetName.getString.replaceAll("var", "someVar")} ++ optionalInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")} ++ variadicInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")} ++ (0 until (9 - (optionalInputs(z).size + requiredInputs(z).size + variadicInputs(z).size))).map(_ => "None : Option[Any]")).map(i => i.replaceAll("shape", "shapeInput")).mkString(",") + ")" + 
         "\n" + 
