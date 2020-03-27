@@ -48,7 +48,7 @@ object ONNXGenerator extends App {
 //Each operator used within a graph MUST be explicitly declared by one of the operator sets imported by the model.
 val useZIO = false
   val useDotty = false
-  val unionTypeOperator = "#or"
+  val unionTypeOperator = " | "
 
   //Missing: Non-numeric, Boolean and String
 //  val checkedTypes = (if(useDotty) "(" else "(implicit ev:(UNil TypeOr ") + "Float16" + unionTypeOperator + "Float" + unionTypeOperator + "Double" + unionTypeOperator + "Byte" + unionTypeOperator + "Short" + unionTypeOperator + "Int" + unionTypeOperator + "Long" + unionTypeOperator + "UByte" + unionTypeOperator + "UShort" + unionTypeOperator + "UInt" + unionTypeOperator + "ULong" + unionTypeOperator + "Complex[Float]" + unionTypeOperator + "Complex[Double]" + (if(useDotty) ")" else ")#check[T])")
@@ -108,8 +108,7 @@ val useZIO = false
        x.inputs,
        x.outputs,
        x.typeConstraintParams,
-       x.attributes)).groupBy(_._1)
-         //.map(y => (y._1, y._2.distinct))
+       x.attributes)).groupBy(_._1).map(y => (y._1, y._2.reverse))
 //  tuples.foreach( y => println(y._2))
 
   val traitStringsAndTypeStrings = tuples.map { x =>
@@ -169,11 +168,11 @@ println(typeStringMap)
         val incremented = attrIter.increment
         val str = "" + result._1
           .replaceAll("split", "splitAttr")
-          .replaceAll("scale", "scaleAttr") + " : " + (
-                                                         "Option[") + "(" + result._2
+          .replaceAll("scale", "scaleAttr") + " : " + 
+          (if(!required)"Option[" else "") + "(" + result._2
           .replaceAll("Tensor", "Tensor[T]") +  //Shouldn't need to do this; the type constraints are not encoded correctly on ONNX side. See hack later to replace for ConstantOfShape
           ")" +
-          (if (required) "]" else "] = None")
+          (if (required) "" else "] = None")
         str
       }
       .mkString(",")
@@ -214,28 +213,29 @@ println(typeStringMap)
          .zip(inImplicit)
         .map(y =>
         "@sp " +
-        y._1.GetTypeStr.getString + ( " : ") + "Numeric:ClassTag" //TODO: Don't add numeric if not required to be numeric
+        y._1.GetTypeStr.getString + (" <: ") + generateDefStringSig(y._1) + ( " : ") + "Numeric:ClassTag" //TODO: Don't add numeric if not required to be numeric
         )
       )
     }
 
-    val maxSinceVersion = (x._2.map(z => z._2) foldLeft 0)(Math.max)
-
-        val beginString = "trait " + x._1 + 
-          (if(useZIO) "ZIO" else "") + " extends Operator" + " {\n"
+//    val maxSinceVersion = (x._2.map(z => z._2) foldLeft 0)(Math.max)
 
 
         def generateDefStringSig(s: org.bytedeco.onnx.OpSchema.FormalParameter) = {
-           ( "ev" + s.GetTypeStr.getString + ":" + "Contains[" + s.GetTypeStr.getString + ", Union[") + typeStringMap(s.GetTypeStr.getString).map{ a =>
+           typeStringMap(s.GetTypeStr.getString).map{ a =>
               val replaceParens = (a).replaceAll("\\(", "[").replaceAll("\\)", "]")
               (if(replaceParens.contains("Tensor[")) replaceParens.stripPrefix("Tensor[").stripSuffix("]") else replaceParens)}
                             .distinct
-                            .mkString("]" + unionTypeOperator + "[") +
-                              ("]#or[UNil]#create]")
-        }
+                            .mkString(unionTypeOperator ).replaceAll("tensor", "Tensor")
+
+        } 
+
+//        val beginString = "trait " + x._1 //+
+      //  "[" + typeStrings.distinct.mkString(",") + "]" 
 
         val defStrings = (0 until 
-          requiredInputs.size).map {z =>
+          1).map {z =>
+            println("DEF STRING " + z.toString)
            val requiredImplicitsInputs = (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
            .map(y => generateDefStringSig(y)))
 
@@ -244,21 +244,20 @@ println(typeStringMap)
 
            val variadicImplicitsInputs = (variadicInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
            .map(y =>  generateDefStringSig(y)))
-
+ 
            val implicitsOutputs = (outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
            .map(y =>  generateDefStringSig(y)))
-
-       val allImplicits = (requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).distinct.mkString(",").replaceAll("tensor", "Tensor")
-
 
       def processInput(someInput: scala.collection.immutable.IndexedSeq[org.bytedeco.onnx.OpSchema.FormalParameter], optional: Boolean, variadic: Boolean) = {
         someInput.map(y =>
           y.GetName.getString
             .replaceAll("var", "someVar")
             .replaceAll("shape", "shapeInput")
-            + ": " + (if(variadic) "Seq[" else "") + "Option[" +
+            + ": " + (if(variadic) "Seq[" else "") + 
+            (if(optional) "Option[" else "") +
                        (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) +
-                         "]" + (if(variadic) "]" else "") + (if(optional && !variadic) " = None" else "") // + (if(variadic) "" else ", " + y.GetName.getString + "name: Option[String]" + (if(optional) " = None" else "") )
+                         (if(optional) "]" else "") + 
+                         (if(variadic) "]" else "") + (if(optional && !variadic) " = None" else "") // + (if(variadic) "" else ", " + y.GetName.getString + "name: Option[String]" + (if(optional) " = None" else "") )
             )
 //        .map(y => if(optional) y.replaceAll("shape", "shapeInput") else y)
 //        .mkString(", ")
@@ -284,11 +283,12 @@ println(typeStringMap)
 
         val allProcessedInputs = requiredProcessedInputs ++ optionalProcessedInputs ++ variadicProcessedInputs
 
+
+      "trait " + x._1 +
+        (if(typeStrings.nonEmpty) "[" else "") + typeStrings.distinct.mkString(",") + (if(typeStrings.nonEmpty) "]" else "") +" extends Operator {" +
       "\n  def " + x._1 + x._2(z)._2.toString + (if(useZIO)"ZIO" else "") +
-//      (if(x._2(z)._2 < maxSinceVersion) x._2(z)._2.toString else "") +
-      (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 ||variadicInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "[" else "") +
-        typeStrings.distinct.mkString(",") +
-      (if (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || optionalInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || variadicInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0 || outputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString)).size > 0) "]" else "") +
+//      (if(x._2(z)._2 < maxSinceVersion) x._2(z)._2.toString else "") "[" + +
+      //"\n"+
       "(" + 
       "name: String" +
       (if (requiredInputs(z).size > 0 || optionalInputs(z).size > 0 || variadicInputs(z).size > 0 || attributesStrings(z).size > 0) "," else "") +
@@ -301,25 +301,30 @@ println(typeStringMap)
             ","
        else "") + variadicProcessedInputs.mkString(", ") +
       ")\n" +
-      (
-      (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).size > 0) "(implicit " else "") + allImplicits +  (if((requiredImplicitsInputs ++ optionalImplicitsInputs ++ variadicImplicitsInputs ++ implicitsOutputs).size > 0) ")" else "")
-      ) +
       "    : " + 
-      (if(useZIO) "Task[" else "") + "(" + 
-      processOutputs(0) + (if(useZIO) "]" else ")") +"\n" +
+      (if(useZIO) "Task[" else "") + "Tuple1[" + 
+      processOutputs(0) + (if(useZIO) "]" else "]") +"\n" +
 //Body
 " = {\n" + "val map: Map[String, Any] = Map(" + attributesStrings(z).split(",").filter(!_.isEmpty).map{ i => "\"" + i.split(":")(0).trim() + "\"" + " -> " + i.split(":")(0) + "\n"}.mkString(",") +
         ")\n" +
-        "val allInputs = (" + (requiredInputs(z).map{i =>  i.GetName.getString.replaceAll("var", "someVar")} ++ optionalInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")} ++ (0 until (9 - (optionalInputs(z).size + requiredInputs(z).size))).map{t => if(variadicInputs(z).size > 0) { variadicInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar") + ".lift(" + t.toString + ").flatten" }.mkString(",")} else { "None : Option[Any]"}}).map(i => i.replaceAll("shape", "shapeInput")).mkString(",") + ")" + 
+        "val allInputs = " + 
+      (if (variadicInputs(z).size + requiredInputs(z).size + optionalInputs(z).size > 0) 
+        "Some(" + (requiredInputs(z).map{i =>  i.GetName.getString.replaceAll("var", "someVar")} ++ optionalInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")} ++ (0 until (9 - (optionalInputs(z).size + requiredInputs(z).size))).map{t => if(variadicInputs(z).size > 0) { variadicInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar") + "(" + t.toString + ")" }.mkString(",")} else { ""}}).filter(_.nonEmpty).map(i => i.replaceAll("shape", "shapeInput")).mkString(",")  +
+        " *: () )"
+        else "None" )+ 
         "\n" + 
         "(callOp" +
-        "[" + (allProcessedInputs.map(i => i.split(":")(1).split("=")(0)) ++ (0 until (9 - allProcessedInputs.size)).map(_ => if(variadicInputs(z).isEmpty){"Any"} else {variadicProcessedInputs.map(i => i.split(":")(1).split("=")(0)).mkString(",")}) ++ processOutputs ++ (0 until (9 - processOutputs.size)).map(_ => "Any")).mkString(",").replaceAll("Seq\\[", "").replaceAll("\\]\\]\\]", "\\]\\]") +"]" +
+                "[" + (processOutputs(0)) +"]" +
         "(name,\"" + x._1 + "\"," + "allInputs, map))" +"\n}"
           }.distinct.mkString("\n")
 
-      val endString = "\n}"
+      val endString = "\n}\n"
 
-      val traitString = beginString + defStrings + endString
+
+//      val beginString = "trait " + x._1 +
+//        "[" + typeStrings.distinct.mkString(",") + "]" 
+
+      val traitString = defStrings + endString
 
     (traitString, typeStringMap)
   }
@@ -356,22 +361,6 @@ println(typeStringMap)
     "{\n" +
     (if(useZIO) "" else 
   """
-  type ![A] = A => Nothing
-  type !![A] = ![![A]]
-
-  trait Disjunction[T] {
-    type or[S] = Disjunction[T with ![S]]
-    type create = ![T]
-  }
-
-  type Union[T] = {
-    type or[S] = Disjunction[![T]]#or[S]
-  }
-
-  type Contains[S, T] = !![S] <:< T
-
-  type UNil
-
   trait Dim
 
   sealed trait Axes
@@ -398,57 +387,21 @@ println(typeStringMap)
     (if(useZIO) "" else """
   
     trait Operator {
-    def callOp[
-        T: ClassTag,
-        T1: ClassTag,
-        T2: ClassTag,
-        T3: ClassTag,
-        T4: ClassTag,
-        T5: ClassTag,
-        T6: ClassTag,
-        T7: ClassTag,
-        T8: ClassTag,
-        T9: ClassTag,
-        T10: ClassTag,
-        T11: ClassTag,
-        T12: ClassTag,
-        T13: ClassTag,
-        T14: ClassTag,
-        T15: ClassTag,
-        T16: ClassTag,
-        T17: ClassTag
-    ](
+    def callOp[T: ClassTag](
         name: String,
         opName: String,
-        inputs: Tuple9[T, T1, T2, T3, T4, T5, T6, T7, T8],
+        inputs: Option[NonEmptyTuple],
         //    outName: String,
         attrs: Map[String, Any]
-    ): (T9)
+    ): Tuple1[T]
   }
 
   abstract class Model(onnxBytes: Array[Byte]) extends Operator{
     def fullModel[
-      T: ClassTag,
-      T1: ClassTag,
-      T2: ClassTag,
-      T3: ClassTag,
-      T4: ClassTag,
-      T5: ClassTag,
-      T6: ClassTag,
-      T7: ClassTag,
-      T8: ClassTag,
-      T9: ClassTag,
-      T10: ClassTag,
-      T11: ClassTag,
-      T12: ClassTag,
-      T13: ClassTag,
-      T14: ClassTag,
-      T15: ClassTag,
-      T16: ClassTag,
-      T17: ClassTag
+      T: ClassTag
     ](
-      inputs: Tuple9[T, T1, T2, T3, T4, T5, T6, T7, T8]
-  ): (T9)
+      inputs: Option[NonEmptyTuple]
+  ): Tuple1[T]
   }
 
       """ ) +
