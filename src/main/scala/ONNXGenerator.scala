@@ -233,8 +233,8 @@ println(typeStringMap)
 //        val beginString = "trait " + x._1 //+
       //  "[" + typeStrings.distinct.mkString(",") + "]" 
 
-        val defStrings = (0 until 
-          1).map {z =>
+        val defStrings = (0 until x._2.size 
+          ).map {z =>
             println("DEF STRING " + z.toString)
            val requiredImplicitsInputs = (requiredInputs(z).filter(y => typeStringMap.exists(_._1 === y.GetTypeStr.getString))
            .map(y => generateDefStringSig(y)))
@@ -284,7 +284,7 @@ println(typeStringMap)
         val allProcessedInputs = requiredProcessedInputs ++ optionalProcessedInputs ++ variadicProcessedInputs
 
 
-      "trait " + x._1 +
+      "trait " + x._1 + x._2(z)._2.toString +
         (if(typeStrings.nonEmpty) "[" else "") + typeStrings.distinct.mkString(",") + (if(typeStrings.nonEmpty) "]" else "") +" extends Operator {" +
       "\n  def " + x._1 + x._2(z)._2.toString + (if(useZIO)"ZIO" else "") +
 //      (if(x._2(z)._2 < maxSinceVersion) x._2(z)._2.toString else "") "[" + +
@@ -315,10 +315,10 @@ println(typeStringMap)
         "\n" + 
         "(callOp" +
                 "[" + (processOutputs(0)) +"]" +
-        "(name,\"" + x._1 + "\"," + "allInputs, map))" +"\n}"
+        "(name,\"" + x._1 + "\"," + "allInputs, map))" +"\n}\n}"
           }.distinct.mkString("\n")
 
-      val endString = "\n}\n"
+      val endString = "\n"
 
 
 //      val beginString = "trait " + x._1 +
