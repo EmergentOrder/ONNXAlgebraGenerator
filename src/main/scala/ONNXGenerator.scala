@@ -320,7 +320,8 @@ println(typeStringMap)
         "Some(Tuple" + (totalSizeNonVariadic).toString + "(" + (requiredInputs(z).map{i =>  i.GetName.getString.replaceAll("var", "someVar")} ++ optionalInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")}).filter(_.nonEmpty).map(i => i.replaceAll("shape", "shapeInput")).mkString(",")
         + (if(variadicInputs(z).size > 0) { (0 until variadicInputs(z).size).map(i => ") ++ (" + variadicInputs(z)(i).GetName.getString).mkString("")} else "")+
         "))"
-        else "None" )+ 
+        else if (variadicInputs(z).size > 0) { "Some(" + (0 until variadicInputs(z).size).map(i =>variadicInputs(z)(i).GetName.getString).mkString(" ++ ") + ")"} 
+          else "None" )+ 
         "\n" + 
         "(callOp" +
                 "[" + (processOutputs(0)) +"]" +
