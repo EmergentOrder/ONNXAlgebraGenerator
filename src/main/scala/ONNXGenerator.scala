@@ -257,7 +257,7 @@ println(typeStringMap)
           y.GetName.getString
             .replaceAll("var", "someVar")
             .replaceAll("shape", "shapeInput")
-            + ": " + (if(variadic) "Tuple" else  
+            + ": " + (if(variadic) "NonEmptyTuple" else  
             (if(optional) "Option[" else "") +
                        (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) +
                          (if(optional) "]" else "") + 
