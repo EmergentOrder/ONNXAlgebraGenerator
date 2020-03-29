@@ -23,7 +23,11 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 object ONNXGenerator extends App {
-//TODO: Grab doc strings and put them in scaladoc
+//TODO: handle maps with HList style
+//TODO: Opaque types for really typesafe tensor
+//TODO: Make variadic inputs tuples ?
+//
+  //TODO: Grab doc strings and put them in scaladoc
   //TODO: Enforce shape constraints - using dependent types via singleton and higher-kinded
 //TODO: Use numsca for Tensor[Doubles only] ?  or tensorflow_scala[Generic, but not typed by shape] 
 //or MXNet[ supprots Float16,Float32,Float64,Int32,UInt8, but most operators Float32 and 64 only] or Compute.scala[Float only, others on roadmap] or none
@@ -253,12 +257,13 @@ println(typeStringMap)
           y.GetName.getString
             .replaceAll("var", "someVar")
             .replaceAll("shape", "shapeInput")
-            + ": " + (if(variadic) "Seq[" else "") + 
+            + ": " + (if(variadic) "Tuple" else  
             (if(optional) "Option[" else "") +
                        (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) +
                          (if(optional) "]" else "") + 
-                         (if(variadic) "]" else "") + (if(optional && !variadic) " = None" else "") // + (if(variadic) "" else ", " + y.GetName.getString + "name: Option[String]" + (if(optional) " = None" else "") )
+                          (if(optional && !variadic) " = None" else "") // + (if(variadic) "" else ", " + y.GetName.getString + "name: Option[String]" + (if(optional) " = None" else "") )
             )
+          )
 //        .map(y => if(optional) y.replaceAll("shape", "shapeInput") else y)
 //        .mkString(", ")
       }
@@ -283,10 +288,13 @@ println(typeStringMap)
 
         val allProcessedInputs = requiredProcessedInputs ++ optionalProcessedInputs ++ variadicProcessedInputs
 
+        val totalSizeNonVariadic = requiredInputs(z).size + optionalInputs(z).size 
 
-      "trait " + x._1 + x._2(z)._2.toString +
-        (if(typeStrings.nonEmpty) "[" else "") + typeStrings.distinct.mkString(",") + (if(typeStrings.nonEmpty) "]" else "") +" extends Operator {" +
-      "\n  def " + x._1 + x._2(z)._2.toString + (if(useZIO)"ZIO" else "") +
+      "trait " + x._1 + "V" + x._2(z)._2.toString +
+//        (if(typeStrings.nonEmpty) "[" else "") + typeStrings.distinct.mkString(",") + (if(typeStrings.nonEmpty) "]" else "") + 
+        " extends Operator {" +
+      "\n  def " + x._1 + "V" + x._2(z)._2.toString + (if(useZIO)"ZIO" else "") +
+        (if(typeStrings.nonEmpty) "[" else "") + typeStrings.distinct.mkString(",") + (if(typeStrings.nonEmpty) "]" else "") +  
 //      (if(x._2(z)._2 < maxSinceVersion) x._2(z)._2.toString else "") "[" + +
       //"\n"+
       "(" + 
@@ -308,14 +316,15 @@ println(typeStringMap)
 " = {\n" + "val map: Map[String, Any] = Map(" + attributesStrings(z).split(",").filter(!_.isEmpty).map{ i => "\"" + i.split(":")(0).trim() + "\"" + " -> " + i.split(":")(0) + "\n"}.mkString(",") +
         ")\n" +
         "val allInputs = " + 
-      (if (variadicInputs(z).size + requiredInputs(z).size + optionalInputs(z).size > 0) 
-        "Some(" + (requiredInputs(z).map{i =>  i.GetName.getString.replaceAll("var", "someVar")} ++ optionalInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")} ++ (0 until (9 - (optionalInputs(z).size + requiredInputs(z).size))).map{t => if(variadicInputs(z).size > 0) { variadicInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar") + "(" + t.toString + ")" }.mkString(",")} else { ""}}).filter(_.nonEmpty).map(i => i.replaceAll("shape", "shapeInput")).mkString(",")  +
-        " *: () )"
+      (if (totalSizeNonVariadic > 0) 
+        "Some(Tuple" + (totalSizeNonVariadic).toString + "(" + (requiredInputs(z).map{i =>  i.GetName.getString.replaceAll("var", "someVar")} ++ optionalInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")}).filter(_.nonEmpty).map(i => i.replaceAll("shape", "shapeInput")).mkString(",")
+        + (if(variadicInputs(z).size > 0) { (0 until variadicInputs(z).size).map(i => ") ++ (" + variadicInputs(z)(i).GetName.getString).mkString("")} else "")+
+        "))"
         else "None" )+ 
         "\n" + 
         "(callOp" +
                 "[" + (processOutputs(0)) +"]" +
-        "(name,\"" + x._1 + "\"," + "allInputs, map))" +"\n}\n}"
+        "(name,\"" + x._1 + "\"," + "allInputs, map))" +"\n}\n}\n"
           }.distinct.mkString("\n")
 
       val endString = "\n"
@@ -386,7 +395,7 @@ println(typeStringMap)
   """ + "\n") +
     (if(useZIO) "" else """
   
-    trait Operator {
+    sealed trait Operator {
     def callOp[T: ClassTag](
         name: String,
         opName: String,
