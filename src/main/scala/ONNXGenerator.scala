@@ -104,6 +104,7 @@ val useZIO = false
 
   val schemas = org.bytedeco.onnx.OpSchemaRegistry.get_all_schemas_with_history
   val schemasSize = schemas.size
+  println(schemasSize)
   val scalaCollSchemas = (0 until schemasSize.toInt).map(x => schemas.get(x))
   val tuples = scalaCollSchemas.map(
     x =>
@@ -368,35 +369,9 @@ println(typeStringMap)
     (if(useZIO) "import onnx._\n" else "") +
 //    "import scala.language.higherKinds\n\n" +
     "package" + (if(useZIO) " object" else " object") + " onnx" +  (if(useZIO) "ZIO " else " ") +
-    "{\n" +
-    (if(useZIO) "" else 
-  """
-  trait Dim
-
-  sealed trait Axes
-
-  sealed trait Scalar extends Axes
-  sealed trait Vec[T <: Dim] extends Axes
-  sealed trait Mat[T <: Dim, U <: Dim] extends Axes
-  sealed trait Tuple3OfDim[T <: Dim, U <: Dim, V <: Dim] extends Axes
-
-  type TypesafeTensor[T, A <: Axes] = Tuple2[Array[T], Array[Int]]
-
-  type Tensor[T] = TypesafeTensor[T, Axes]
-  type SparseTensor[T] = Tensor[T]
-
-  type XInt = Int with Singleton
-
-  object TensorFactory {
-    def getTensor[T](data: Array[T], t: Array[Int]): Tensor[T] = {
-      require(data.size == t.foldLeft(1)(_ * _))
-      (data, t)
-    }
-   }
-  """ + "\n") +
-    (if(useZIO) "" else """
-  
-    sealed trait Operator {
+    "{\n"  +
+    (if(useZIO) "" else """ 
+  sealed trait Operator {
     def callOp[T: ClassTag](
         name: String,
         opName: String,
