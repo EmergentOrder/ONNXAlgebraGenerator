@@ -258,12 +258,12 @@ println(typeStringMap)
           y.GetName.getString
             .replaceAll("var", "someVar")
             .replaceAll("shape", "shapeInput")
-            + ": " + (if(variadic) "NonEmptyTuple" else  
+            + ": " + (if(variadic) "Seq[" else "") +  
             (if(optional) "Option[" else "") +
                        (if(typeStringMap.exists(_._1 === y.GetTypeStr.getString) && typeStringMap(y.GetTypeStr.getString).exists(_.contains("Tensor"))) "Tensor[" + y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]") + "]" else  y.GetTypeStr.getString.replaceAll("tensor\\(string\\)", "Tensor[String]").replaceAll("tensor\\(int64\\)","Tensor[Long]").replaceAll("tensor\\(float\\)","Tensor[Float]")) +
-                         (if(optional) "]" else "") + 
+                         (if(optional) "]" else "") + (if(variadic) "]" else "") + 
                           (if(optional && !variadic) " = None" else "") // + (if(variadic) "" else ", " + y.GetName.getString + "name: Option[String]" + (if(optional) " = None" else "") )
-            )
+//            )
           )
 //        .map(y => if(optional) y.replaceAll("shape", "shapeInput") else y)
 //        .mkString(", ")
@@ -319,9 +319,9 @@ println(typeStringMap)
         "val allInputs = " + 
       (if (totalSizeNonVariadic > 0) 
         "Some(Tuple" + (totalSizeNonVariadic).toString + "(" + (requiredInputs(z).map{i =>  i.GetName.getString.replaceAll("var", "someVar")} ++ optionalInputs(z).map{i => i.GetName.getString.replaceAll("var", "someVar")}).filter(_.nonEmpty).map(i => i.replaceAll("shape", "shapeInput")).mkString(",")
-        + (if(variadicInputs(z).size > 0) { (0 until variadicInputs(z).size).map(i => ") ++ (" + variadicInputs(z)(i).GetName.getString).mkString("")} else "")+
+        + (if(variadicInputs(z).size > 0) { (0 until variadicInputs(z).size).map(i => ") ++ (Tuple.fromArray(" + variadicInputs(z)(i).GetName.getString).mkString("") + ".toArray).asInstanceOf[NonEmptyTuple]"} else "")+
         "))"
-        else if (variadicInputs(z).size > 0) { "Some(" + (0 until variadicInputs(z).size).map(i =>variadicInputs(z)(i).GetName.getString).mkString(" ++ ") + ")"} 
+        else if (variadicInputs(z).size > 0) { "Some(" + (0 until variadicInputs(z).size).map(i => "Tuple.fromArray(" + variadicInputs(z)(i).GetName.getString + ".toArray).asInstanceOf[NonEmptyTuple]").mkString(" ++ ") + ")"} //Cast to NonEmptyTuple is ok because all variadic inputs are required
           else "None" )+ 
         "\n" + 
         "(callOp" +
